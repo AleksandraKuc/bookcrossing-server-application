@@ -1,8 +1,8 @@
 --
--- Baza danych: `bookcrossing-app`
+-- Baza danych: `bookcrossing-2`
 --
-CREATE DATABASE `bookcrossing-app` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
-USE `bookcrossing-app`;
+CREATE DATABASE `bookcrossing-2` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `bookcrossing-2`;
 
 -- --------------------------------------------------------
 
@@ -10,17 +10,16 @@ CREATE TABLE IF NOT EXISTS `user` (
   `id_user` int(8) NOT NULL,
   `username` varchar(50) NOT NULL,
   `password` varchar(50) NOT NULL,
-  `firstName` varchar(50) NOT NULL,
-  `lastName` varchar(50) NOT NULL,
+  `first_name` varchar(50) NOT NULL,
+  `last_name` varchar(50) NOT NULL,
   `email` varchar(150) NOT NULL,
   `city` varchar(50) NOT NULL,
   `province` varchar(50) NOT NULL,
-  `phoneNumber` int(11) NULL,
-  `startDate` Date NOT NULL,
-  `isAdmin` boolean NULL DEFAULT 0,
-  `addedBooks` int(3) NULL DEFAULT 0,
+  `phone_number` int(11) NULL,
+  `start_date` Date NOT NULL,
+  `added_books` int(3) NULL DEFAULT 0,
   `usertype` tinyint(1) NULL DEFAULT 0,
-  PRIMARY KEY (`userId`)
+  PRIMARY KEY (`id_user`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
@@ -32,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `book` (
   `description` varchar(400) NULL,
   `isbn` varchar(255) NULL,
   `category` enum('Biography', 'ChildrenBook', 'Guide', 'PopularScience', 'Thriller', 'Novel', 'Poetry', 'History', 'Romance', 'Education', 'Scientific', 'Adventure', 'Criminal', 'Humour', 'Science-fiction', 'Other') NOT NULL,
-  PRIMARY KEY (`bookId`)
+  PRIMARY KEY (`id_book`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
@@ -40,9 +39,9 @@ CREATE TABLE IF NOT EXISTS `conversation` (
   `id_conversation` int(8) NOT NULL,
   `first_user` int(8) NOT NULL,
   `second_user` int(8) NOT NULL,
-  PRIMARY KEY (`conversationId`),
-  FOREIGN KEY (`first_user`) REFERENCES `users` (`id_user`),
-  FOREIGN KEY (`second_user`) REFERENCES `users` (`id_user`)
+  PRIMARY KEY (`id_conversation`),
+  FOREIGN KEY (`first_user`) REFERENCES `user` (`id_user`),
+  FOREIGN KEY (`second_user`) REFERENCES `user` (`id_user`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
@@ -70,9 +69,9 @@ CREATE TABLE IF NOT EXISTS `book_history` (
   `book` int(8) NOT NULL,
   `date` Date NOT NULL,
   PRIMARY KEY (`id_history`),
-  FOREIGN KEY (`current_user`) REFERENCES `users` (`id_user`),
-  FOREIGN KEY (`first_user`) REFERENCES `users` (`id_user`),
-  FOREIGN KEY (`book`) REFERENCES `books` (`id_book`)
+  FOREIGN KEY (`current_user`) REFERENCES `user` (`id_user`),
+  FOREIGN KEY (`first_user`) REFERENCES `user` (`id_user`),
+  FOREIGN KEY (`book`) REFERENCES `book` (`id_book`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
@@ -83,13 +82,13 @@ CREATE TABLE IF NOT EXISTS `book_history` (
 CREATE TABLE IF NOT EXISTS `favourite_books` (
   `userId` int(8) NOT NULL,
   `bookId` int(8) NOT NULL,
-  FOREIGN KEY (`userId`) REFERENCES `users` (`userId`),
-  FOREIGN KEY (`bookId`) REFERENCES `books` (`bookId`)
+  FOREIGN KEY (`userId`) REFERENCES `user` (`userId`),
+  FOREIGN KEY (`bookId`) REFERENCES `book` (`bookId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 CREATE TRIGGER bookcrossing_OnInsertHistory BEFORE INSERT ON book_history
-       FOR EACH ROW SET NEW.startDate = NOW(), NEW.date = NOW(), NEW.currentUserId = NEW.firstUserId;
+       FOR EACH ROW SET NEW.start_date = NOW(), NEW.date = NOW(), NEW.current_user = NEW.first_user;
 
 
 CREATE TRIGGER bookcrossing_OnInsertUser BEFORE INSERT ON user
