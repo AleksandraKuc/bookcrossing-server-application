@@ -1,3 +1,4 @@
+/*
 package project.bookcrossing.repository;
 
 
@@ -13,3 +14,4 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
 //	List<Message> findLastByDate(Conversation conversation);
 	List<Message> findByConversationOrderByDateAsc(Conversation conversation);
 }
+*/

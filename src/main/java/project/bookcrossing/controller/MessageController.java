@@ -1,3 +1,4 @@
+/*
 package project.bookcrossing.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,3 +43,4 @@ public class MessageController {
 		return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
 	}
 }
+*/
