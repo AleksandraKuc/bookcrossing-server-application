@@ -1,110 +1,90 @@
 package project.bookcrossing.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
 import java.io.Serializable;
+import java.sql.Date;
+import java.util.List;
 
 @Entity
 @SequenceGenerator(name = "history_seq", allocationSize = 100)
 public class BookHistory implements Serializable {
 
-//	private static final long serialVersionUID = 1L;
-
 	@Id
 	@GeneratedValue(strategy= GenerationType.SEQUENCE)
 	private long id_history;
 
-	@OneToOne(
-			fetch = FetchType.LAZY,
-			optional = false
-	)
-	@JoinColumn(
-			name = "current_user", referencedColumnName = "id_user",
-			nullable = false
-	)
-	@JsonIgnore
-	private User current_user;
+	@ManyToMany
+	@JoinTable(
+			name = "user_book",
+			joinColumns = @JoinColumn(name = "id_history"),
+			inverseJoinColumns = @JoinColumn(name = "id_user"))
+	List<User> users;
 
-	@OneToOne(
-			fetch = FetchType.LAZY,
-			optional = false
-	)
-	@JoinColumn(
-			name = "first_user", referencedColumnName = "id_user",
-			nullable = false
-	)
-	@JsonIgnore
-	private User first_user;
-
-	@OneToOne(
-			fetch = FetchType.LAZY,
-			optional = false,
-			cascade = CascadeType.ALL
-	)
-	@JoinColumn(
-			name = "book", referencedColumnName = "id_book",
-			nullable = false
-	)
-	@JsonIgnore
+	@OneToOne(mappedBy = "history")
 	private Book book;
 
-	private String start_date;
-	private String date;
+	private Date start_date;
+	private Date last_hire;
 
 	public BookHistory(){}
 
-	public BookHistory(User current_user, User first_user, Book book, String start_date, String date) {
-		this.current_user = current_user;
-		this.first_user = first_user;
+	public BookHistory(User current_user, User first_user, Book book, Date start_date, Date last_hire) {
+		this.users.add(0, current_user);
+		this.users.add(1, first_user);
 		this.book = book;
 		this.start_date = start_date;
-		this.date = date;
+		this.last_hire = last_hire;
 	}
 
 	public BookHistory(User current_user, User first_user, Book book){
-		this.current_user = current_user;
-		this.first_user = first_user;
+		this.users.add(0, current_user);
+		this.users.add(1, first_user);
+		this.book = book;
+	}
+
+	public BookHistory(User current_user, Book book){
+		this.users.add(0, current_user);
+		this.users.add(1, current_user);
 		this.book = book;
 	}
 
 	public BookHistory(User current_user) {
-		this.current_user = current_user;
+		this.users.add(0, current_user);
 	}
 
 	public User getCurrent_user() {
-		return current_user;
+		return this.users.get(0);
 	}
 
 	public void setCurrent_user(User current_user){
-		this.current_user = current_user;
+		this.users.set(0, current_user);
 	}
 
 	public User getFirst_user() {
-		return first_user;
+		return this.users.get(1);
 	}
 
 	public Book getBook() {
 		return book;
 	}
 
-	public String getStart_date() {
+	public Date getStart_date() {
 		return start_date;
 	}
 
-	public String getDate() {
-		return date;
+	public Date getLast_hire() {
+		return last_hire;
 	}
 
 	@Override
 	public String toString() {
 		return "BookHistory{" +
 				"id_history=" + id_history +
-				", current_user=" + current_user +
-				", first_user=" + first_user +
+				", current_user=" + users.get(0) +
+				", first_user=" + users.get(1) +
 				", book=" + book +
 				", start_date='" + start_date + '\'' +
-				", date='" + date + '\'' +
+				", date='" + last_hire + '\'' +
 				'}';
 	}
 }

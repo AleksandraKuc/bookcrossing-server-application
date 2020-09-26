@@ -9,7 +9,7 @@ import javax.persistence.*;
 public class Message {
 
 	@Id
-	@GeneratedValue(strategy= GenerationType.SEQUENCE)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private long id_message;
 
 	@Column(nullable = false)
@@ -17,18 +17,15 @@ public class Message {
 
 	private String date;
 
-	@ManyToOne(
-			fetch = FetchType.LAZY,
-			cascade = CascadeType.ALL
-	)
+	@ManyToOne
 	@JoinColumn(
-			name = "conversation", referencedColumnName = "id_conversation",
+			name = "conversation",
 			nullable = false
 	)
-	@JsonIgnore
 	private Conversation conversation;
 
-	public Message(){}
+	public Message() {
+	}
 
 	public Message(String content, Conversation conversation) {
 		this.content = content;

@@ -1,3 +1,4 @@
+/*
 package project.bookcrossing.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,3 +32,4 @@ public class ConversationController {
 		return conversationService.removeConversation(id_conversation);
 	}
 }
+*/

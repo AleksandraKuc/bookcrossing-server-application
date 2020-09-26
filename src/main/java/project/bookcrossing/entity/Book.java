@@ -2,8 +2,7 @@ package project.bookcrossing.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @SequenceGenerator(name = "book_seq", allocationSize = 100)
@@ -25,14 +24,22 @@ public class Book implements Serializable{
 	@Column(nullable = false)
 	private BookCategory category;
 
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "history", referencedColumnName = "id_history")
+	private BookHistory history;
+
+	@OneToMany(mappedBy = "book_fav")
+	List<FavouriteBooks> favourites;
+
 	public Book(){}
 
-	public Book(String title, String author, String description, String ISBN, BookCategory category){
+	public Book(String title, String author, String description, String ISBN, BookCategory category, BookHistory bookHistory){
 		this.title = title;
 		this.author = author;
 		this.description = description;
 		this.ISBN = ISBN;
 		this.category = category;
+		this.history = bookHistory;
 	}
 
 	public String getTitle() {
@@ -61,6 +68,14 @@ public class Book implements Serializable{
 
 	public long getId_book(){
 		return id_book;
+	}
+
+	public BookHistory getHistory() {
+		return history;
+	}
+
+	public void setHistory(BookHistory history) {
+		this.history = history;
 	}
 
 	@Override

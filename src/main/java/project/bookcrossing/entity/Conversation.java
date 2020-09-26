@@ -1,61 +1,56 @@
 package project.bookcrossing.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @SequenceGenerator(name = "conversation_seq", allocationSize = 100)
 public class Conversation {
 
 	@Id
-	@GeneratedValue(strategy= GenerationType.SEQUENCE)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private long id_conversation;
 
-	@ManyToOne(
-			fetch = FetchType.LAZY,
-			optional = false,
-			cascade = CascadeType.MERGE
-	)
-	@JoinColumn(
-			name = "first_user", referencedColumnName = "id_user",
-			insertable = false,
-			updatable = false,
-			nullable = false
-	)
-	@JsonIgnore
-	private User firstUser;
+	@ManyToMany
+	@JoinTable(
+			name = "user_conversation",
+			joinColumns = @JoinColumn(name = "id_conversation"),
+			inverseJoinColumns = @JoinColumn(name = "id_user"))
+	private List<User> conversation_users;
 
-	@ManyToOne(
-			fetch = FetchType.LAZY,
-			optional = false,
-			cascade = CascadeType.MERGE
-	)
-	@JoinColumn(
-			name = "second_user", referencedColumnName = "id_user",
-			insertable = false,
-			updatable = false,
-			nullable = false
-	)
-	@JsonIgnore
-	private User secondUser;
+	@OneToMany(mappedBy = "conversation")
+	private List<Message> messagesList;
 
-	public Conversation(){}
+	public Conversation() {
+	}
 
-	public Conversation(User firstUser, User secondUser) {
-		this.firstUser = firstUser;
-		this.secondUser = secondUser;
+	public Conversation(User firstUser, User secondUser, List<Message> messageList) {
+		this.conversation_users.add(0, firstUser);
+		this.conversation_users.add(1, secondUser);
+		this.messagesList = messageList;
 	}
 
 	public User getFirstUser() {
-		return firstUser;
+		return conversation_users.get(0);
 	}
 
-	public void setFirstUser(User firstUser) { this.firstUser = firstUser; }
+	public void setFirstUser(User firstUser) {
+		this.conversation_users.set(0, firstUser);
+	}
 
 	public User getSecondUser() {
-		return secondUser;
+		return conversation_users.get(1);
 	}
 
-	public void setSecondUser(User secondUser) { this.secondUser = secondUser; }
+	public void setSecondUser(User secondUser) {
+		this.conversation_users.set(1, secondUser);
+	}
+
+	public List<Message> getMessagesList() {
+		return messagesList;
+	}
+
+	public void setMessagesList(List<Message> messagesList) {
+		this.messagesList = messagesList;
+	}
 }

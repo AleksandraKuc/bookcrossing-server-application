@@ -19,7 +19,7 @@ public class BookService {
 
 	public ResponseEntity<Book> postBook(Book book) {
 		try {
-			Book _book = bookRepository.save(new Book( book.getTitle(), book.getAuthor(), book.getDescription(), book.getISBN(), book.getCategory()));
+			Book _book = bookRepository.save(new Book( book.getTitle(), book.getAuthor(), book.getDescription(), book.getISBN(), book.getCategory(), book.getHistory()));
 			return new ResponseEntity<>(_book, HttpStatus.CREATED);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
