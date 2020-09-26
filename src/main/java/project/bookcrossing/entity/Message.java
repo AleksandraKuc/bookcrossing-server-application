@@ -22,7 +22,7 @@ public class Message {
 			cascade = CascadeType.ALL
 	)
 	@JoinColumn(
-			name = "convesation", referencedColumnName = "id_conversation",
+			name = "conversation", referencedColumnName = "id_conversation",
 			nullable = false
 	)
 	@JsonIgnore

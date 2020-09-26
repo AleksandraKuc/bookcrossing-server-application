@@ -49,9 +49,9 @@ CREATE TABLE IF NOT EXISTS `message` (
   `id_message` int(8) NOT NULL,
   `content` varchar(150) NOT NULL,
   `date` Date NOT NULL,
-  `id_conversation` int(8) NOT NULL,
+  `conversation` int(8) NOT NULL,
   PRIMARY KEY (`id_message`),
-  FOREIGN KEY (`id_conversation`) REFERENCES `conversation` (`id_conversation`)
+  FOREIGN KEY (`conversation`) REFERENCES `conversation` (`id_conversation`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 

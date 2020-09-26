@@ -15,10 +15,10 @@ public class Conversation {
 	@ManyToOne(
 			fetch = FetchType.LAZY,
 			optional = false,
-			cascade = CascadeType.ALL
+			cascade = CascadeType.MERGE
 	)
 	@JoinColumn(
-			name = "user",
+			name = "first_user", referencedColumnName = "id_user",
 			insertable = false,
 			updatable = false,
 			nullable = false
@@ -29,10 +29,10 @@ public class Conversation {
 	@ManyToOne(
 			fetch = FetchType.LAZY,
 			optional = false,
-			cascade = CascadeType.ALL
+			cascade = CascadeType.MERGE
 	)
 	@JoinColumn(
-			name = "user",
+			name = "second_user", referencedColumnName = "id_user",
 			insertable = false,
 			updatable = false,
 			nullable = false
