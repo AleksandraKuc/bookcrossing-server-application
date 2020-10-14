@@ -4,9 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import project.bookcrossing.entity.BookHistory;
 import project.bookcrossing.entity.HistoryUsers;
-import project.bookcrossing.entity.HistoryUsersKey;
 import project.bookcrossing.service.HistoryUsersService;
 
 import java.util.List;

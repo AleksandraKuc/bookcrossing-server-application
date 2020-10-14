@@ -5,11 +5,9 @@ import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import project.bookcrossing.entity.HistoryUsers;
 import project.bookcrossing.entity.User;
 import project.bookcrossing.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 

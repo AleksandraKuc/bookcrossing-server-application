@@ -11,6 +11,5 @@ import java.util.Optional;
 @Repository
 public interface MessageRepository extends CrudRepository<Message, Long> {
 	List<Message> getAllByConversation(Conversation conversation);
-//	List<Message> findLastByDate(Conversation conversation);
 	List<Message> findByConversationOrderByDateAsc(Conversation conversation);
 }

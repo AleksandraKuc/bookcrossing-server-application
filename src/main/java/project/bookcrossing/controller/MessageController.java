@@ -20,11 +20,6 @@ public class MessageController {
 	@Autowired
 	private ConversationService conversationService;
 
-//	@GetMapping(value = "/all/{id_conversation}")
-//	public ResponseEntity<List<Message>> getAllMessages(@PathVariable long id_conversation){
-//		return messageService.getMessagesByConversation(id_conversation);
-//	}
-
 	@PostMapping(value = "/create/{id_conversation}")
 	public ResponseEntity<Message> postMessage(@PathVariable long id_conversation, @RequestBody Message message){
 		ResponseEntity<Conversation> conversation = conversationService.getConversationById(id_conversation);

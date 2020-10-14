@@ -17,15 +17,6 @@ public class BookHistoryService {
 	@Autowired
 	private BookHistoryRepository historyRepository;
 
-	public ResponseEntity<BookHistory> postHistory(BookHistory bookHistory) {
-		try {
-			BookHistory _bookHistory = historyRepository.save(bookHistory);
-			return new ResponseEntity<>(_bookHistory, HttpStatus.CREATED);
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-
 	public ResponseEntity<BookHistory> createHistory() {
 		try {
 			BookHistory _bookHistory = historyRepository.save(new BookHistory(new Date(), new Date()));
