@@ -3,7 +3,6 @@ package project.bookcrossing.entity;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.io.Serializable;
-import java.util.Objects;
 
 @Embeddable
 public class FavouritesKey implements Serializable {
@@ -37,11 +36,4 @@ public class FavouritesKey implements Serializable {
 		this.id_user = id_user;
 	}
 
-	@Override
-	public String toString() {
-		return "FavouritesKey{" +
-				"id_book=" + id_book +
-				", id_user=" + id_user +
-				'}';
-	}
 }

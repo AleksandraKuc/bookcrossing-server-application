@@ -7,9 +7,7 @@ import org.springframework.stereotype.Service;
 import project.bookcrossing.entity.Book;
 import project.bookcrossing.entity.BookHistory;
 import project.bookcrossing.repository.BookRepository;
-import project.bookcrossing.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,7 +32,7 @@ public class BookService {
 		try {
 			List<Book> books = (List<Book>) bookRepository.findAll();
 			if (books.isEmpty()) {
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 			return new ResponseEntity<>(books, HttpStatus.OK);
 		} catch (Exception e) {
@@ -49,15 +47,14 @@ public class BookService {
 		return bookData.map(book -> new ResponseEntity<>(book, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 
-//	public ResponseEntity<List<Book>> getBooksByUser(long userId){
-//	create list od book and forEach dla id history & add to list next books
-/**
- * needs:
- * userService.getUserById() - jest
- * historyUser.getHistoryByUser()
- * bookHistory.getBookHistoryByHistory()
- * bookService.getBookByHistory()
- */
+	public ResponseEntity<Book> getBookByHistory(BookHistory bookHistory) {
+		Book book = bookRepository.findByHistory(bookHistory);
+		if (book != null) {
+			return new ResponseEntity<>(book, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+		}
+	}
 
 	public ResponseEntity<Book> updateBook(long book_id, Book book) {
 
@@ -91,7 +88,7 @@ public class BookService {
 			ResponseEntity<BookHistory> _history = historyService.updateHistory(history.getId_history());
 			return new ResponseEntity<>(_history.getStatusCode());
 		}
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
 	}
 }

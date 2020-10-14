@@ -4,14 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import project.bookcrossing.entity.Book;
-import project.bookcrossing.entity.BookHistory;
-import project.bookcrossing.entity.HistoryUsers;
-import project.bookcrossing.entity.HistoryUsersKey;
+import project.bookcrossing.entity.*;
 import project.bookcrossing.service.BookHistoryService;
 import project.bookcrossing.service.BookService;
 import project.bookcrossing.service.HistoryUsersService;
+import project.bookcrossing.service.UserService;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -26,6 +25,8 @@ public class BookController {
 	private HistoryUsersService historyUsersService;
 	@Autowired
 	private BookHistoryService bookHistoryService;
+	@Autowired
+	private UserService userService;
 
 	@GetMapping(value = "/all")
 	public ResponseEntity<List<Book>> getAllBooks() {
@@ -37,10 +38,27 @@ public class BookController {
 		return bookService.getBookById(book_id);
 	}
 
-//	@GetMapping(value = "/getBook/{user_id}")
-//	public ResponseEntity<List<Book>> getBooksByUser(@PathVariable long user_id) {
-//		return bookService.getBooksByUser(user_id);
-//	}
+	@GetMapping(value = "getBooksByUser/{user_id}")
+	public ResponseEntity<List<Book>> getBooksByUser(@PathVariable long user_id) {
+		List<Book> books = new ArrayList<>();
+		List<HistoryUsers> historyUsers = historyUsersService.getByCurrentUserKey(user_id).getBody();
+		if (historyUsers != null && !historyUsers.isEmpty()) {
+			for (HistoryUsers item : historyUsers){
+				BookHistory bookHistory = bookHistoryService.getHistoryById(item.getId_historyUsers().getId_history()).getBody();
+				if (bookHistory != null) {
+					Book book = bookService.getBookByHistory(bookHistory).getBody();
+					if (book != null) {
+						books.add(book);
+					}
+				}
+			}
+		}
+		if (!books.isEmpty()) {
+			return new ResponseEntity<>(books, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+		}
+	}
 
 	@PostMapping(value = "/create/{user_id}")
 	public ResponseEntity<Book> postBook(@PathVariable long user_id, @RequestBody Book book) {
@@ -53,11 +71,7 @@ public class BookController {
 		if (_book.getStatusCode().equals(HttpStatus.CREATED)) {
 			ResponseEntity<Book> sentBook = bookService.getBookById(Objects.requireNonNull(_book.getBody()).getId_book());
 			if (sentBook.getStatusCode().equals(HttpStatus.OK)) {
-				Long historyId = Objects.requireNonNull(sentBook.getBody()).getHistory().getId_history();
-
-//				HistoryUsers historyUsers = new HistoryUsers();
-//				historyUsers.setId_historyUsers(new HistoryUsersKey(historyId, user_id));
-//				ResponseEntity<HistoryUsers> _historyUser = historyUsersService.postHistoryUsers(historyUsers);
+				long historyId = Objects.requireNonNull(sentBook.getBody()).getHistory().getId_history();
 				ResponseEntity<HistoryUsers> _historyUser = historyUsersService.createHistoryUsers(historyId, user_id);
 				if (_historyUser.getStatusCode().equals(HttpStatus.CREATED)) {
 					return _book;

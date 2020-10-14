@@ -2,7 +2,6 @@ package project.bookcrossing.entity;
 
 import javax.persistence.*;
 import java.sql.Date;
-import java.util.List;
 
 @Entity
 @SequenceGenerator(name = "user_seq", allocationSize = 100)
@@ -143,21 +142,4 @@ public class User {
 		return usertype;
 	}
 
-	@Override
-	public String toString() {
-		return "User{" +
-				"id=" + id_user +
-				", username='" + username + '\'' +
-				", password='" + password + '\'' +
-				", first_name='" + first_name + '\'' +
-				", last_name='" + last_name + '\'' +
-				", email='" + email + '\'' +
-				", city='" + city + '\'' +
-				", province='" + province + '\'' +
-				", phone_number=" + phone_number +
-				", start_date='" + start_date + '\'' +
-				", usertype=" + usertype +
-				", added_books=" + added_books +
-				'}';
-	}
 }
