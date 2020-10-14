@@ -1,7 +1,5 @@
 package project.bookcrossing.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
 
 @Entity
@@ -37,6 +35,8 @@ public class Message {
 		this.date = date;
 		this.conversation = conversation;
 	}
+
+	public long getId_message() { return id_message; }
 
 	public String getContent() {
 		return content;

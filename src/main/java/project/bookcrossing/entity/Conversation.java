@@ -1,6 +1,7 @@
 package project.bookcrossing.entity;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -16,7 +17,7 @@ public class Conversation {
 			name = "user_conversation",
 			joinColumns = @JoinColumn(name = "id_conversation"),
 			inverseJoinColumns = @JoinColumn(name = "id_user"))
-	private List<User> conversation_users;
+	private List<User> conversationUsers;
 
 	@OneToMany(mappedBy = "conversation")
 	private List<Message> messagesList;
@@ -24,26 +25,35 @@ public class Conversation {
 	public Conversation() {
 	}
 
+	public Conversation(User firstUser, User secondUser) {
+		this.conversationUsers = new ArrayList<>();
+		this.conversationUsers.add(0, firstUser);
+		this.conversationUsers.add(1, secondUser);
+	}
+
 	public Conversation(User firstUser, User secondUser, List<Message> messageList) {
-		this.conversation_users.add(0, firstUser);
-		this.conversation_users.add(1, secondUser);
+		this.conversationUsers = new ArrayList<>();
+		this.conversationUsers.add(0, firstUser);
+		this.conversationUsers.add(1, secondUser);
 		this.messagesList = messageList;
 	}
 
+	public long getId_conversation() { return this.id_conversation; }
+
 	public User getFirstUser() {
-		return conversation_users.get(0);
+		return conversationUsers.get(0);
 	}
 
 	public void setFirstUser(User firstUser) {
-		this.conversation_users.set(0, firstUser);
+		this.conversationUsers.set(0, firstUser);
 	}
 
 	public User getSecondUser() {
-		return conversation_users.get(1);
+		return conversationUsers.get(1);
 	}
 
 	public void setSecondUser(User secondUser) {
-		this.conversation_users.set(1, secondUser);
+		this.conversationUsers.set(1, secondUser);
 	}
 
 	public List<Message> getMessagesList() {

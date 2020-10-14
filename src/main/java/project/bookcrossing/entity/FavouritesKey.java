@@ -13,4 +13,35 @@ public class FavouritesKey implements Serializable {
 
 	@Column(name = "id_user")
 	Long id_user;
+
+	public FavouritesKey(){}
+
+	public FavouritesKey(Long id_book, Long id_user) {
+		this.id_book = id_book;
+		this.id_user = id_user;
+	}
+
+	public Long getId_book() {
+		return id_book;
+	}
+
+	public void setId_book(Long id_book) {
+		this.id_book = id_book;
+	}
+
+	public Long getId_user() {
+		return id_user;
+	}
+
+	public void setId_user(Long id_user) {
+		this.id_user = id_user;
+	}
+
+	@Override
+	public String toString() {
+		return "FavouritesKey{" +
+				"id_book=" + id_book +
+				", id_user=" + id_user +
+				'}';
+	}
 }

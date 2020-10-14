@@ -26,6 +26,7 @@ public class DataBaseConnector implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
+
 //		this.userRepository.save(new User("login1", "haslo1", "imie1", "nazwisko1", "email1", "city1", "wojewodztwo1", 123456));
 //		this.userRepository.save(new User("login2", "haslo2", "imie2", "nazwisko2", "email2", "city2", "wojewodztwo2", 123456));
 //		this.userRepository.save(new User("login3", "haslo3", "imie3", "nazwisko3", "email3", "city3", "wojewodztwo3", 123456));

@@ -1,9 +1,11 @@
 package project.bookcrossing.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import project.bookcrossing.entity.HistoryUsers;
 import project.bookcrossing.entity.User;
 import project.bookcrossing.repository.UserRepository;
 
@@ -27,12 +29,26 @@ public class UserService {
 		return userData.map(user -> new ResponseEntity<>(user, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 
-	public ResponseEntity<List<User>> getUsers() {
+	public ResponseEntity<List<User>> getUserByNames(User user){
+		Example<User> userExample = Example.of(user);
+
 		try {
-			List<User> users = new ArrayList<>(userRepository.findAll());
+			List<User> _results = userRepository.findAll(userExample);
+			if (_results.isEmpty()) {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+			return new ResponseEntity<>(_results, HttpStatus.OK);
+		} catch (Exception e) {
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	public ResponseEntity<List<User>> getAllUsers() {
+		try {
+			List<User> users = userRepository.findAll(Example.of(new User()));
 
 			if (users.isEmpty()) {
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 			return new ResponseEntity<>(users, HttpStatus.OK);
 		} catch (Exception e) {
@@ -42,7 +58,7 @@ public class UserService {
 
 	public ResponseEntity<User> postUser(User user){
 		try {
-			User _user = userRepository.save(new User(user.getUsername(), user.getPassword(), user.getFirstName(), user.getLastName(), user.getEmail(), user.getCity(), user.getProvince(), user.getPhoneNumber()));
+			User _user = userRepository.save(user);
 			return new ResponseEntity<>(_user, HttpStatus.CREATED);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
@@ -76,5 +92,4 @@ public class UserService {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
-
 }

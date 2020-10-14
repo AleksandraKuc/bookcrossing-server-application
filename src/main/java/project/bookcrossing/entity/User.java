@@ -1,7 +1,6 @@
 package project.bookcrossing.entity;
 
 import javax.persistence.*;
-import javax.swing.text.IconView;
 import java.sql.Date;
 import java.util.List;
 
@@ -32,19 +31,10 @@ public class User {
 	private boolean usertype;
 	private int added_books;
 
-	@ManyToMany(mappedBy = "users")
-	private List<BookHistory> historyList;
-
-	@ManyToMany(mappedBy = "conversation_users")
-	private List<Conversation> conversationList;
-
-	@OneToMany(mappedBy = "user_fav")
-	List<FavouriteBooks> favourites;
-
 	public User(){
 	}
 
-	public User(String username, String password, String first_name, String last_name, String email, String city, String province, long phone_number, Date start_date, boolean usertype, int added_books, List<BookHistory> historyList, List<Conversation> conversationList) {
+	public User(String username, String password, String first_name, String last_name, String email, String city, String province, long phone_number, Date start_date, boolean usertype, int added_books) {
 		this.username = username;
 		this.password = password;
 		this.first_name = first_name;
@@ -56,8 +46,6 @@ public class User {
 		this.start_date = start_date;
 		this.usertype = usertype;
 		this.added_books = added_books;
-		this.historyList = historyList;
-		this.conversationList = conversationList;
 	}
 
 	public User(String username, String password, String first_name, String last_name, String email, String city, String province, long phone_number) {
@@ -153,22 +141,6 @@ public class User {
 
 	public boolean getUsertype() {
 		return usertype;
-	}
-
-	public List<BookHistory> getHistoryList() {
-		return historyList;
-	}
-
-	public void setHistoryList(List<BookHistory> historyList) {
-		this.historyList = historyList;
-	}
-
-	public List<Conversation> getConversationList() {
-		return conversationList;
-	}
-
-	public void setConversationList(List<Conversation> conversationList) {
-		this.conversationList = conversationList;
 	}
 
 	@Override
