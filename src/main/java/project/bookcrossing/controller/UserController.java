@@ -16,12 +16,9 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 
-	@GetMapping(value = "/getById/{id}")
-	public ResponseEntity<User> getUserById(@PathVariable long id){
-		ResponseEntity<User> _user = userService.getUserById(id);
-		System.out.println(_user.getBody());
-		return _user;
-//		return userService.getUserById(id);
+	@GetMapping(value = "/getById/{user_id}")
+	public ResponseEntity<User> getUserById(@PathVariable long user_id){
+		return userService.getUserById(user_id);
 	}
 
 	@GetMapping(value = "/getByUsername/{username}")
@@ -29,9 +26,17 @@ public class UserController {
 		return userService.getUserByUsername(username);
 	}
 
+	@GetMapping(value = "/getByNames/{firstName}/{lastName}")
+	public ResponseEntity<List<User>> getUserByName(@PathVariable String firstName, @PathVariable String lastName){
+		User user = new User();
+		user.setFirstName(firstName);
+		user.setLastName(lastName);
+		return userService.getUserByNames(user);
+	}
+
 	@GetMapping(value = "/all")
 	public ResponseEntity<List<User>> getUsers(){
-		return userService.getUsers();
+		return userService.getAllUsers();
 	}
 
 	@PostMapping(value = "/create")

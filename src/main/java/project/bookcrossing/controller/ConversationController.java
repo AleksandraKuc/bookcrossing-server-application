@@ -1,4 +1,3 @@
-/*
 package project.bookcrossing.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,9 +5,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import project.bookcrossing.entity.Conversation;
+import project.bookcrossing.entity.User;
 import project.bookcrossing.service.ConversationService;
+import project.bookcrossing.service.UserService;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/conversation")
@@ -16,20 +18,30 @@ public class ConversationController {
 
 	@Autowired
 	private ConversationService conversationService;
+	@Autowired
+	private UserService userService;
 
-	@GetMapping(value = "/all")
-	public ResponseEntity<List<Conversation>> getAllConversations() {
-		return conversationService.getConversations();
+	@PostMapping(value = "/create/{user_id}/{recipient_id}")
+	public ResponseEntity<Conversation> postConversation(@PathVariable long user_id, @PathVariable long recipient_id) {
+		User firstUser = userService.getUserById(user_id).getBody();
+		User secondUser = userService.getUserById(recipient_id).getBody();
+		return conversationService.createConversation(firstUser, secondUser);
 	}
 
-	@PostMapping(value = "/create/{userId}:{recipientId}")
-	public ResponseEntity<Conversation> postConversation(@PathVariable long userId, @PathVariable long recipientId) {
-		return conversationService.postConversation(userId, recipientId);
+	@GetMapping(value = "/getByUser/{user_id}")
+	public ResponseEntity<List<Conversation>> getByUser(@PathVariable long user_id){
+		User user = userService.getUserById(user_id).getBody();
+		return conversationService.getConversationsByUser(user);
 	}
 
-	@DeleteMapping("/delete/{id_conversation}")
-	public ResponseEntity<HttpStatus> deleteConversation(@PathVariable long id_conversation) {
-		return conversationService.removeConversation(id_conversation);
+	@DeleteMapping("/delete/{conversation_id}")
+	public ResponseEntity<HttpStatus> deleteConversation(@PathVariable long conversation_id) {
+		return conversationService.deleteConversation(conversation_id);
+	}
+
+	@DeleteMapping("/deleteByUser/{user_id}")
+	public ResponseEntity<HttpStatus> deleteConversationsByUser(@PathVariable long user_id) {
+		User user = userService.getUserById(user_id).getBody();
+		return conversationService.deleteConversationByUser(user);
 	}
 }
-*/

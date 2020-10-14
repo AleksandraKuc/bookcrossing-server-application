@@ -1,4 +1,3 @@
-/*
 package project.bookcrossing.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,9 +7,7 @@ import org.springframework.stereotype.Service;
 import project.bookcrossing.entity.Conversation;
 import project.bookcrossing.entity.User;
 import project.bookcrossing.repository.ConversationRepository;
-import project.bookcrossing.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,31 +17,17 @@ public class ConversationService {
 	@Autowired
 	private ConversationRepository conversationRepository;
 
-	@Autowired
-	private UserRepository userRepository;
-
-	public ResponseEntity<Conversation> postConversation(long userId, long recipientId) {
+	public ResponseEntity<Conversation> createConversation(User firstUser, User secondUser) {
 		try {
-			Optional<User> firstUser = userRepository.findById(userId);
-			Optional<User> secondUser = userRepository.findById(recipientId);
-			if (firstUser.isPresent()) {
-				User _firstUser = firstUser.get();
-
-				if (secondUser.isPresent()) {
-					User _secondUser = secondUser.get();
-					Conversation _conversation = conversationRepository.save(new Conversation(_firstUser, _secondUser));
-					return new ResponseEntity<>(_conversation, HttpStatus.CREATED);
-				}
-			}
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(conversationRepository.save(new Conversation(firstUser, secondUser)), HttpStatus.CREATED);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
 		}
 	}
 
-	public ResponseEntity<List<Conversation>> getConversations() {
+	public ResponseEntity<List<Conversation>> getConversationsByUser(User user) {
 		try {
-			List<Conversation> conversations = new ArrayList<>(conversationRepository.findAll());
+			List<Conversation> conversations = conversationRepository.getAllByConversationUsers(user);
 			if (conversations.isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
@@ -52,16 +35,15 @@ public class ConversationService {
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+
 	}
 
 	public ResponseEntity<Conversation> getConversationById(long id) {
-
 		Optional<Conversation> conversationData = conversationRepository.findById(id);
 		return conversationData.map(conversation -> new ResponseEntity<>(conversation, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 
-	public ResponseEntity<HttpStatus> removeConversation(long id_conversation) {
-
+	public ResponseEntity<HttpStatus> deleteConversation(long id_conversation) {
 		try {
 			conversationRepository.deleteById(id_conversation);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -69,5 +51,15 @@ public class ConversationService {
 			return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
 		}
 	}
+
+	public ResponseEntity<HttpStatus> deleteConversationByUser(User user) {
+		List<Conversation> conversations = conversationRepository.getAllByConversationUsers(user);
+		if (conversations != null && !conversations.isEmpty()) {
+			for (Conversation item : conversations) {
+				deleteConversation(item.getId_conversation());
+			}
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
+	}
 }
-*/

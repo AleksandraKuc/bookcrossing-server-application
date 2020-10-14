@@ -2,7 +2,6 @@ package project.bookcrossing.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.List;
 
 @Entity
 @SequenceGenerator(name = "book_seq", allocationSize = 100)
@@ -28,10 +27,15 @@ public class Book implements Serializable{
 	@JoinColumn(name = "history", referencedColumnName = "id_history")
 	private BookHistory history;
 
-	@OneToMany(mappedBy = "book_fav")
-	List<FavouriteBooks> favourites;
-
 	public Book(){}
+
+	public Book(String title, String author, String description, String ISBN, BookCategory category){
+		this.title = title;
+		this.author = author;
+		this.description = description;
+		this.ISBN = ISBN;
+		this.category = category;
+	}
 
 	public Book(String title, String author, String description, String ISBN, BookCategory category, BookHistory bookHistory){
 		this.title = title;
