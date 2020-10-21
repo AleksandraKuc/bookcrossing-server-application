@@ -55,23 +55,34 @@ public class HistoryUsersService {
 		List<HistoryUsers> usersList = getByKey(_historyUser).getBody();
 		List<HistoryUsers> currentUsersList = new ArrayList<>();
 		List<HistoryUsers> firstUsersList = new ArrayList<>();
+		System.out.println('a');
 		if (usersList != null) {
+			System.out.println('b');
 			for (HistoryUsers item : usersList) {
+				System.out.println('c');
 				List<HistoryUsers> history = getByHistoryKey(item.getId_historyUsers().getId_history()).getBody();
+				System.out.println('d');
 				if (history != null && !history.isEmpty()) {
+					System.out.println('e');
 					if (history.get(1).getId_historyUsers().getId_user().equals(user_id)) {
+						System.out.println('f');
 						currentUsersList.add(item);
 					} else if (history.get(0).getId_historyUsers().getId_user().equals(user_id)) {
+						System.out.println('g');
 						firstUsersList.add(item);
 					}
 				}
 			}
+			System.out.println('h');
 			if (type.equals("currentUser")){
+				System.out.println('i');
 				return new ResponseEntity<>(currentUsersList, HttpStatus.OK);
 			} else {
+				System.out.println('j');
 				return new ResponseEntity<>(firstUsersList, HttpStatus.OK);
 			}
 		}
+		System.out.println('k');
 		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 

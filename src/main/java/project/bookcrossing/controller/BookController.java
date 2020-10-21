@@ -25,8 +25,6 @@ public class BookController {
 	private HistoryUsersService historyUsersService;
 	@Autowired
 	private BookHistoryService bookHistoryService;
-	@Autowired
-	private UserService userService;
 
 	@GetMapping(value = "/all")
 	public ResponseEntity<List<Book>> getAllBooks() {
@@ -38,24 +36,50 @@ public class BookController {
 		return bookService.getBookById(book_id);
 	}
 
+	@GetMapping(value = "/getByTitleCategory/{title}/{category}")
+	public ResponseEntity<List<Book>> getBookByTitleAndCategory(@PathVariable String title, @PathVariable String category) {
+		return bookService.getBookByTitleAndCategory(title, category);
+	}
+
+	@GetMapping(value = "/getByTitle/{title}")
+	public ResponseEntity<List<Book>> getBookByTitle(@PathVariable String title) {
+		return bookService.getBookByTitle(title);
+	}
+
+	@GetMapping(value = "/getByCategory/{category}")
+	public ResponseEntity<List<Book>> getBookByCategory(@PathVariable String category) {
+		return bookService.getBookByCategory(category);
+	}
+
 	@GetMapping(value = "getBooksByUser/{user_id}")
 	public ResponseEntity<List<Book>> getBooksByUser(@PathVariable long user_id) {
 		List<Book> books = new ArrayList<>();
+		System.out.println(1);
 		List<HistoryUsers> historyUsers = historyUsersService.getByCurrentUserKey(user_id).getBody();
+		System.out.println(2);
 		if (historyUsers != null && !historyUsers.isEmpty()) {
+			System.out.println(3);
 			for (HistoryUsers item : historyUsers){
+				System.out.println(4);
 				BookHistory bookHistory = bookHistoryService.getHistoryById(item.getId_historyUsers().getId_history()).getBody();
+				System.out.println(5);
 				if (bookHistory != null) {
+					System.out.println(6);
 					Book book = bookService.getBookByHistory(bookHistory).getBody();
+					System.out.println(7);
 					if (book != null) {
+						System.out.println(8);
 						books.add(book);
 					}
 				}
 			}
 		}
+		System.out.println(9);
 		if (!books.isEmpty()) {
+			System.out.println(10);
 			return new ResponseEntity<>(books, HttpStatus.OK);
 		} else {
+			System.out.println(11);
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		}
 	}
