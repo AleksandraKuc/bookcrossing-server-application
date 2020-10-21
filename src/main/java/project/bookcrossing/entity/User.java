@@ -16,46 +16,46 @@ public class User {
 	@Column(nullable = false)
 	private String password;
 	@Column(nullable = false)
-	private String first_name;
+	private String firstName;
 	@Column(nullable = false)
-	private String last_name;
+	private String lastName;
 	@Column(nullable = false)
 	private String email;
 	@Column(nullable = false)
 	private String city;
 	@Column(nullable = false)
 	private String province;
-	private long phone_number;
-	private Date start_date;
+	private long phoneNumber;
+	private Date startDate;
 	private boolean usertype;
-	private int added_books;
+	private int addedBooks;
 
 	public User(){
 	}
 
-	public User(String username, String password, String first_name, String last_name, String email, String city, String province, long phone_number, Date start_date, boolean usertype, int added_books) {
+	public User(String username, String password, String firstName, String lastName, String email, String city, String province, long phoneNumber, Date startDate, boolean usertype, int addedBooks) {
 		this.username = username;
 		this.password = password;
-		this.first_name = first_name;
-		this.last_name = last_name;
+		this.firstName = firstName;
+		this.lastName = lastName;
 		this.email = email;
 		this.city = city;
 		this.province = province;
-		this.phone_number = phone_number;
-		this.start_date = start_date;
+		this.phoneNumber = phoneNumber;
+		this.startDate = startDate;
 		this.usertype = usertype;
-		this.added_books = added_books;
+		this.addedBooks = addedBooks;
 	}
 
-	public User(String username, String password, String first_name, String last_name, String email, String city, String province, long phone_number) {
+	public User(String username, String password, String firstName, String lastName, String email, String city, String province, long phoneNumber) {
 		this.username = username;
 		this.password = password;
-		this.first_name = first_name;
-		this.last_name = last_name;
+		this.firstName = firstName;
+		this.lastName = lastName;
 		this.email = email;
 		this.city = city;
 		this.province = province;
-		this.phone_number = phone_number;
+		this.phoneNumber = phoneNumber;
 	}
 
 	public String getUsername() {
@@ -75,19 +75,19 @@ public class User {
 	}
 
 	public String getFirstName() {
-		return first_name;
+		return firstName;
 	}
 
-	public void setFirstName(String first_name) {
-		this.first_name = first_name;
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
 	}
 
 	public String getLastName() {
-		return last_name;
+		return lastName;
 	}
 
-	public void setLastName(String last_name) {
-		this.last_name = last_name;
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
 	}
 
 	public String getEmail() {
@@ -115,19 +115,19 @@ public class User {
 	}
 
 	public long getPhoneNumber() {
-		return phone_number;
+		return phoneNumber;
 	}
 
-	public void setPhoneNumber(long phone_number) {
-		this.phone_number = phone_number;
+	public void setPhoneNumber(long phoneNumber) {
+		this.phoneNumber = phoneNumber;
 	}
 
 	public int getAddedBooks() {
-		return added_books;
+		return addedBooks;
 	}
 
-	public void setAddedBooks(int added_books) {
-		this.added_books = added_books;
+	public void setAddedBooks(int addedBooks) {
+		this.addedBooks = addedBooks;
 	}
 
 	public long getId() {
@@ -135,11 +135,28 @@ public class User {
 	}
 
 	public Date getStartDate() {
-		return start_date;
+		return startDate;
 	}
 
 	public boolean getUsertype() {
 		return usertype;
 	}
 
+	@Override
+	public String toString() {
+		return "User{" +
+				"id_user=" + id_user +
+				", username='" + username + '\'' +
+				", password='" + password + '\'' +
+				", firstName='" + firstName + '\'' +
+				", lastName='" + lastName + '\'' +
+				", email='" + email + '\'' +
+				", city='" + city + '\'' +
+				", province='" + province + '\'' +
+				", phoneNumber=" + phoneNumber +
+				", startDate=" + startDate +
+				", usertype=" + usertype +
+				", addedBooks=" + addedBooks +
+				'}';
+	}
 }

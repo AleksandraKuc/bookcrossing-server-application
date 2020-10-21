@@ -4,36 +4,36 @@ public enum BookCategory {
 	Biography, ChildrenBook, Guide, PopularScience, Thriller, Novel, Poetry, History, Romance, Education, Scientific, Adventure, Criminal, Humour, Science_fiction, Other;
 
 	public static BookCategory getEnumCategory(String category) {
-		switch (category) {
-			case "Biography":
+		switch (category.toLowerCase()) {
+			case "biography":
 				return BookCategory.Biography;
-			case "ChildrenBook":
+			case "childrenbook":
 				return BookCategory.ChildrenBook;
-			case "Guide":
+			case "guide":
 				return BookCategory.Guide;
-			case "PopularScience":
+			case "popularscience":
 				return BookCategory.PopularScience;
-			case "Thriller":
+			case "thriller":
 				return BookCategory.Thriller;
-			case "Novel":
+			case "novel":
 				return BookCategory.Novel;
-			case "Poetry":
+			case "poetry":
 				return BookCategory.Poetry;
-			case "History":
+			case "history":
 				return BookCategory.History;
-			case "Romance":
+			case "romance":
 				return BookCategory.Romance;
-			case "Education":
+			case "education":
 				return BookCategory.Education;
-			case "Scientific":
+			case "scientific":
 				return BookCategory.Scientific;
-			case "Adventure":
+			case "adventure":
 				return BookCategory.Adventure;
-			case "Criminal":
+			case "criminal":
 				return BookCategory.Criminal;
-			case "Humour":
+			case "humour":
 				return BookCategory.Humour;
-			case "Science_fiction":
+			case "science_fiction":
 				return BookCategory.Science_fiction;
 			default:
 				return BookCategory.Other;

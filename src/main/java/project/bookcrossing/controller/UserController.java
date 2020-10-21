@@ -28,10 +28,7 @@ public class UserController {
 
 	@GetMapping(value = "/getByNames/{firstName}/{lastName}")
 	public ResponseEntity<List<User>> getUserByName(@PathVariable String firstName, @PathVariable String lastName){
-		User user = new User();
-		user.setFirstName(firstName);
-		user.setLastName(lastName);
-		return userService.getUserByNames(user);
+		return userService.getUserByNames(firstName, lastName);
 	}
 
 	@GetMapping(value = "/all")
@@ -49,8 +46,8 @@ public class UserController {
 		return userService.deleteUser(id);
 	}
 
-	@PutMapping("/users/{idUser}")
-	public ResponseEntity<User> updateUser(@PathVariable long id, @RequestBody User user) {
-		return userService.updateUser(id, user);
+	@PutMapping("/update/{idUser}")
+	public ResponseEntity<User> updateUser(@PathVariable long idUser, @RequestBody User user) {
+		return userService.updateUser(idUser, user);
 	}
 }
