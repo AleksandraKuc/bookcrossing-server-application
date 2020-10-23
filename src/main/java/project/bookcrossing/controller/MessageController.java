@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import project.bookcrossing.entity.Conversation;
 import project.bookcrossing.entity.Message;
+import project.bookcrossing.entity.User;
 import project.bookcrossing.service.ConversationService;
 import project.bookcrossing.service.MessageService;
 
@@ -20,11 +21,19 @@ public class MessageController {
 	@Autowired
 	private ConversationService conversationService;
 
-	@PostMapping(value = "/create/{id_conversation}")
-	public ResponseEntity<Message> postMessage(@PathVariable long id_conversation, @RequestBody Message message){
+	@PostMapping(value = "/create/{id_conversation}/{id_user}")
+	public ResponseEntity<Message> postMessage(@PathVariable long id_conversation, @PathVariable long id_user, @RequestBody Message message){
 		ResponseEntity<Conversation> conversation = conversationService.getConversationById(id_conversation);
 		if (conversation.getStatusCode().equals(HttpStatus.OK)) {
-			return messageService.createMessage(message, conversation.getBody());
+			if(conversation.getBody() != null) {
+				User user = conversation.getBody().getFirstUser();
+				if (id_user == user.getId()) {
+					return messageService.createMessage(message, user, conversation.getBody());
+				} else {
+					user = conversation.getBody().getSecondUser();
+					return messageService.createMessage(message, user, conversation.getBody());
+				}
+			}
 		}
 		return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
 	}
@@ -46,7 +55,7 @@ public class MessageController {
 		return messageService.deleteMessage(message_id);
 	}
 
-	@DeleteMapping("/deleteByUser/{conversation_id}")
+	@DeleteMapping("/deleteByConversation/{conversation_id}")
 	public ResponseEntity<HttpStatus> deleteMessageByConversation(@PathVariable long conversation_id) {
 		Conversation conversation = conversationService.getConversationById(conversation_id).getBody();
 		return messageService.deleteByConversation(conversation);

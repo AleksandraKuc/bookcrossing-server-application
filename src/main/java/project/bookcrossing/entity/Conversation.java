@@ -19,8 +19,8 @@ public class Conversation {
 			inverseJoinColumns = @JoinColumn(name = "id_user"))
 	private List<User> conversationUsers;
 
-	@OneToMany(mappedBy = "conversation")
-	private List<Message> messagesList;
+//	@OneToMany(mappedBy = "conversation")
+//	private List<Message> messagesList;
 
 	public Conversation() {
 	}
@@ -35,7 +35,7 @@ public class Conversation {
 		this.conversationUsers = new ArrayList<>();
 		this.conversationUsers.add(0, firstUser);
 		this.conversationUsers.add(1, secondUser);
-		this.messagesList = messageList;
+//		this.messagesList = messageList;
 	}
 
 	public long getId_conversation() { return this.id_conversation; }
@@ -56,11 +56,11 @@ public class Conversation {
 		this.conversationUsers.set(1, secondUser);
 	}
 
-	public List<Message> getMessagesList() {
-		return messagesList;
-	}
+//	public List<Message> getMessagesList() {
+//		return messagesList;
+//	}
 
-	public void setMessagesList(List<Message> messagesList) {
-		this.messagesList = messagesList;
-	}
+//	public void setMessagesList(List<Message> messagesList) {
+//		this.messagesList = messagesList;
+//	}
 }

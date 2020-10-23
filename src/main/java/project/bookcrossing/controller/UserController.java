@@ -4,10 +4,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import project.bookcrossing.entity.FavouritesKey;
 import project.bookcrossing.entity.User;
+import project.bookcrossing.service.ConversationService;
+import project.bookcrossing.service.FavouriteBooksService;
+import project.bookcrossing.service.HistoryUsersService;
 import project.bookcrossing.service.UserService;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/user")
@@ -15,6 +20,12 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private FavouriteBooksService favouriteBooksService;
+	@Autowired
+	private ConversationService conversationService;
+	@Autowired
+	private HistoryUsersService historyUsersService;
 
 	@GetMapping(value = "/getById/{user_id}")
 	public ResponseEntity<User> getUserById(@PathVariable long user_id){
@@ -41,9 +52,15 @@ public class UserController {
 		return userService.postUser(user);
 	}
 
-	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<HttpStatus> deleteUser(@PathVariable long id) {
-		return userService.deleteUser(id);
+	@DeleteMapping("/delete/{id_user}")
+	public ResponseEntity<HttpStatus> deleteUser(@PathVariable long id_user) {
+		FavouritesKey key = new FavouritesKey();
+		key.setId_user(id_user);
+		ResponseEntity<HttpStatus> _fav = favouriteBooksService.deleteFromList(key);
+		User user = getUserById(id_user).getBody();
+		ResponseEntity<HttpStatus> _conv = conversationService.deleteConversationByUser(user);
+		ResponseEntity<HttpStatus> _his = historyUsersService.deleteByUser(id_user);
+		return userService.deleteUser(id_user);
 	}
 
 	@PutMapping("/update/{idUser}")

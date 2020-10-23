@@ -39,4 +39,12 @@ public class HistoryUsersKey implements Serializable {
 	public void setId_user(Long id_user) {
 		this.id_user = id_user;
 	}
+
+	@Override
+	public String toString() {
+		return "HistoryUsersKey{" +
+				"id_history=" + id_history +
+				", id_user=" + id_user +
+				'}';
+	}
 }

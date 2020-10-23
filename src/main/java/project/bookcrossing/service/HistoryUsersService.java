@@ -5,6 +5,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import project.bookcrossing.entity.Book;
 import project.bookcrossing.entity.HistoryUsers;
 import project.bookcrossing.entity.HistoryUsersKey;
 import project.bookcrossing.repository.HistoryUsersRepository;
@@ -18,11 +19,12 @@ public class HistoryUsersService {
 	@Autowired
 	private HistoryUsersRepository historyUsersRepository;
 
-	public ResponseEntity<HistoryUsers> createHistoryUsers(long history_id, long user_id) {
+	public ResponseEntity<HistoryUsers> createHistoryUsers(long history_id, long user_id, String type) {
 		try {
 			HistoryUsers historyUser = new HistoryUsers();
 			HistoryUsersKey key = new HistoryUsersKey(history_id, user_id);
 			historyUser.setId_historyUsers(key);
+			historyUser.setUserType(type);
 			return new ResponseEntity<>(historyUsersRepository.save(historyUser), HttpStatus.CREATED);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
@@ -55,34 +57,29 @@ public class HistoryUsersService {
 		List<HistoryUsers> usersList = getByKey(_historyUser).getBody();
 		List<HistoryUsers> currentUsersList = new ArrayList<>();
 		List<HistoryUsers> firstUsersList = new ArrayList<>();
-		System.out.println('a');
 		if (usersList != null) {
-			System.out.println('b');
 			for (HistoryUsers item : usersList) {
-				System.out.println('c');
 				List<HistoryUsers> history = getByHistoryKey(item.getId_historyUsers().getId_history()).getBody();
-				System.out.println('d');
+
 				if (history != null && !history.isEmpty()) {
-					System.out.println('e');
-					if (history.get(1).getId_historyUsers().getId_user().equals(user_id)) {
-						System.out.println('f');
+					if (history.size() == 1) {
 						currentUsersList.add(item);
-					} else if (history.get(0).getId_historyUsers().getId_user().equals(user_id)) {
-						System.out.println('g');
 						firstUsersList.add(item);
+					} else {
+						if (history.get(0).getId_historyUsers().getId_user().equals(user_id)) {
+							firstUsersList.add(item);
+						} else {
+							currentUsersList.add(item);
+						}
 					}
 				}
 			}
-			System.out.println('h');
 			if (type.equals("currentUser")){
-				System.out.println('i');
 				return new ResponseEntity<>(currentUsersList, HttpStatus.OK);
 			} else {
-				System.out.println('j');
 				return new ResponseEntity<>(firstUsersList, HttpStatus.OK);
 			}
 		}
-		System.out.println('k');
 		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 
@@ -93,10 +90,17 @@ public class HistoryUsersService {
 		key.setId_history(history_id);
 		List<HistoryUsers> history = getByKey(_historyUser).getBody();
 		if (history != null && !history.isEmpty()) {
-			HistoryUsers historyData = history.get(1);
 			try {
-				historyUsersRepository.deleteById(historyData.getId_historyUsers());
-				return createHistoryUsers(history_id, user_id);
+				if (history.size() > 1){
+					HistoryUsers historyData;
+					if (history.get(0).getUserType().equals("currentUser")) {
+						historyData = history.get(0);
+					} else {
+						historyData = history.get(1);
+					}
+					historyUsersRepository.deleteById(historyData.getId_historyUsers());
+				}
+				return createHistoryUsers(history_id, user_id, "currentUser");
 			} catch (Exception e) {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
@@ -104,14 +108,30 @@ public class HistoryUsersService {
 		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 	}
 
-	public ResponseEntity<HttpStatus> deleteHistory(long history_id) {
-		try {
-			HistoryUsersKey key = new HistoryUsersKey(history_id);
-			historyUsersRepository.deleteById(key);
+	public ResponseEntity<HttpStatus> deleteByUser(long user_id) {
+		HistoryUsers historyUser = new HistoryUsers();
+		HistoryUsersKey key = new HistoryUsersKey();
+		key.setId_user(user_id);
+		historyUser.setId_historyUsers(key);
+		return this.deleteList(historyUser);
+	}
+
+	public ResponseEntity<HttpStatus> deleteByHistory(long history_id) {
+		HistoryUsers historyUser = new HistoryUsers();
+		HistoryUsersKey key = new HistoryUsersKey(history_id);
+		historyUser.setId_historyUsers(key);
+		return this.deleteList(historyUser);
+	}
+
+	private ResponseEntity<HttpStatus> deleteList(HistoryUsers historyUser){
+		List<HistoryUsers> _users = getByKey(historyUser).getBody();
+		if (_users != null && !_users.isEmpty()) {
+			for (HistoryUsers us : _users) {
+				historyUsersRepository.deleteById(us.getId_historyUsers());
+			}
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
 		}
+		return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
 	}
 
 	private ResponseEntity<List<HistoryUsers>> getByKey(HistoryUsers _historyUser) {

@@ -16,6 +16,8 @@ public class ConversationService {
 
 	@Autowired
 	private ConversationRepository conversationRepository;
+	@Autowired
+	private MessageService messageService;
 
 	public ResponseEntity<Conversation> createConversation(User firstUser, User secondUser) {
 		try {
@@ -45,8 +47,14 @@ public class ConversationService {
 
 	public ResponseEntity<HttpStatus> deleteConversation(long id_conversation) {
 		try {
-			conversationRepository.deleteById(id_conversation);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			Conversation conversation = getConversationById(id_conversation).getBody();
+			ResponseEntity<HttpStatus> _mes = messageService.deleteByConversation(conversation);
+			if (_mes.getStatusCode().equals(HttpStatus.NO_CONTENT)) {
+				conversationRepository.deleteById(id_conversation);
+				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			} else {
+				return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
+			}
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
 		}
