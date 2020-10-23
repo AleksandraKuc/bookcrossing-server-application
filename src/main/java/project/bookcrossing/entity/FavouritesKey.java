@@ -15,6 +15,10 @@ public class FavouritesKey implements Serializable {
 
 	public FavouritesKey(){}
 
+	public FavouritesKey(Long id_book) {
+		this.id_book = id_book;
+	}
+
 	public FavouritesKey(Long id_book, Long id_user) {
 		this.id_book = id_book;
 		this.id_user = id_user;

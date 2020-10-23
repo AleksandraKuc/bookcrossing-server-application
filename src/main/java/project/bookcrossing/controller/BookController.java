@@ -5,10 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import project.bookcrossing.entity.*;
-import project.bookcrossing.service.BookHistoryService;
-import project.bookcrossing.service.BookService;
-import project.bookcrossing.service.HistoryUsersService;
-import project.bookcrossing.service.UserService;
+import project.bookcrossing.service.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,6 +22,8 @@ public class BookController {
 	private HistoryUsersService historyUsersService;
 	@Autowired
 	private BookHistoryService bookHistoryService;
+	@Autowired
+	private FavouriteBooksService favouriteBooksService;
 
 	@GetMapping(value = "/all")
 	public ResponseEntity<List<Book>> getAllBooks() {
@@ -51,35 +50,24 @@ public class BookController {
 		return bookService.getBookByCategory(category);
 	}
 
-	@GetMapping(value = "getBooksByUser/{user_id}")
+	@GetMapping(value = "/getBooksByUser/{user_id}")
 	public ResponseEntity<List<Book>> getBooksByUser(@PathVariable long user_id) {
 		List<Book> books = new ArrayList<>();
-		System.out.println(1);
 		List<HistoryUsers> historyUsers = historyUsersService.getByCurrentUserKey(user_id).getBody();
-		System.out.println(2);
 		if (historyUsers != null && !historyUsers.isEmpty()) {
-			System.out.println(3);
 			for (HistoryUsers item : historyUsers){
-				System.out.println(4);
 				BookHistory bookHistory = bookHistoryService.getHistoryById(item.getId_historyUsers().getId_history()).getBody();
-				System.out.println(5);
 				if (bookHistory != null) {
-					System.out.println(6);
 					Book book = bookService.getBookByHistory(bookHistory).getBody();
-					System.out.println(7);
 					if (book != null) {
-						System.out.println(8);
 						books.add(book);
 					}
 				}
 			}
 		}
-		System.out.println(9);
 		if (!books.isEmpty()) {
-			System.out.println(10);
 			return new ResponseEntity<>(books, HttpStatus.OK);
 		} else {
-			System.out.println(11);
 			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
 		}
 	}
@@ -96,7 +84,7 @@ public class BookController {
 			ResponseEntity<Book> sentBook = bookService.getBookById(Objects.requireNonNull(_book.getBody()).getId_book());
 			if (sentBook.getStatusCode().equals(HttpStatus.OK)) {
 				long historyId = Objects.requireNonNull(sentBook.getBody()).getHistory().getId_history();
-				ResponseEntity<HistoryUsers> _historyUser = historyUsersService.createHistoryUsers(historyId, user_id);
+				ResponseEntity<HistoryUsers> _historyUser = historyUsersService.createHistoryUsers(historyId, user_id, "firstUser");
 				if (_historyUser.getStatusCode().equals(HttpStatus.CREATED)) {
 					return _book;
 				}
@@ -117,8 +105,13 @@ public class BookController {
 
 	@DeleteMapping(value = "/delete/{book_id}")
 	public ResponseEntity<HttpStatus> deleteBook(@PathVariable long book_id) {
-		long history_id = Objects.requireNonNull(bookService.getBookById(book_id).getBody()).getHistory().getId_history();
-		if (bookHistoryService.deleteHistory(history_id).getStatusCode().equals(HttpStatus.NO_CONTENT)) {
+		Book book = bookService.getBookById(book_id).getBody();
+		if (book != null) {
+			long historyId = book.getHistory().getId_history();
+			FavouritesKey key = new FavouritesKey(book_id);
+			bookHistoryService.deleteHistory(historyId);
+			historyUsersService.deleteByHistory(historyId);
+			favouriteBooksService.deleteByKey(key);
 			return bookService.deleteBook(book_id);
 		}
 		return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);

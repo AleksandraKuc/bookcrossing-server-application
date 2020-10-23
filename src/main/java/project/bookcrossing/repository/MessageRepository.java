@@ -10,6 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface MessageRepository extends CrudRepository<Message, Long> {
+	Optional<Message> findByIdMessage(Long messageId);
 	List<Message> getAllByConversation(Conversation conversation);
-	List<Message> findByConversationOrderByDateAsc(Conversation conversation);
+	List<Message> findByConversationOrderByDateDesc(Conversation conversation);
 }

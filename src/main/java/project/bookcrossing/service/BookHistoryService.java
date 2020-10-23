@@ -19,7 +19,7 @@ public class BookHistoryService {
 
 	public ResponseEntity<BookHistory> createHistory() {
 		try {
-			BookHistory _bookHistory = historyRepository.save(new BookHistory(new Date(), new Date()));
+			BookHistory _bookHistory = historyRepository.save(new BookHistory());
 			return new ResponseEntity<>(_bookHistory, HttpStatus.CREATED);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);

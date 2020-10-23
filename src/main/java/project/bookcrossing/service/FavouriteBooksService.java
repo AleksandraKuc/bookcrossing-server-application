@@ -40,9 +40,11 @@ public class FavouriteBooksService {
 		FavouriteBooks _favBook = new FavouriteBooks();
 		_favBook.setId_favouriteBooks(fav_key);
 		List<FavouriteBooks> books = getByKey(_favBook).getBody();
-		if (books != null && !books.isEmpty()) {
-			for (FavouriteBooks item : books) {
-				deleteByKey(item.getId_favouriteBooks());
+		if (books != null) {
+			if (!books.isEmpty()) {
+				for (FavouriteBooks item : books) {
+					deleteByKey(item.getId_favouriteBooks());
+				}
 			}
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

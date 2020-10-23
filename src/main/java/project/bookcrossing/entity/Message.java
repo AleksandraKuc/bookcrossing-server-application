@@ -1,6 +1,7 @@
 package project.bookcrossing.entity;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @SequenceGenerator(name = "message_seq", allocationSize = 100)
@@ -8,12 +9,16 @@ public class Message {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private long id_message;
+	private long idMessage;
 
 	@Column(nullable = false)
 	private String content;
 
-	private String date;
+	private Date date;
+
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "sender", referencedColumnName = "id_user")
+	private User sender;
 
 	@ManyToOne
 	@JoinColumn(
@@ -25,18 +30,20 @@ public class Message {
 	public Message() {
 	}
 
-	public Message(String content, Conversation conversation) {
+	public Message(String content, User user, Conversation conversation) {
 		this.content = content;
+		this.sender = user;
 		this.conversation = conversation;
 	}
 
-	public Message(String content, String date, Conversation conversation) {
+	public Message(String content, Date date, User user, Conversation conversation) {
 		this.content = content;
 		this.date = date;
+		this.sender = user;
 		this.conversation = conversation;
 	}
 
-	public long getId_message() { return id_message; }
+	public long getId_message() { return idMessage; }
 
 	public String getContent() {
 		return content;
@@ -46,11 +53,11 @@ public class Message {
 		this.content = content;
 	}
 
-	public String getDate() {
+	public Date getDate() {
 		return date;
 	}
 
-	public void setDate(String date) {
+	public void setDate(Date date) {
 		this.date = date;
 	}
 
@@ -60,5 +67,13 @@ public class Message {
 
 	public void setConversation(Conversation conversation) {
 		this.conversation = conversation;
+	}
+
+	public User getSender() {
+		return sender;
+	}
+
+	public void setSender(User sender) {
+		this.sender = sender;
 	}
 }
