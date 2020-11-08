@@ -5,9 +5,10 @@ import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import project.bookcrossing.entity.Book;
 import project.bookcrossing.entity.HistoryUsers;
 import project.bookcrossing.entity.HistoryUsersKey;
+import project.bookcrossing.entity.User;
+import project.bookcrossing.exception.CustomException;
 import project.bookcrossing.repository.HistoryUsersRepository;
 
 import java.util.ArrayList;
@@ -19,36 +20,33 @@ public class HistoryUsersService {
 	@Autowired
 	private HistoryUsersRepository historyUsersRepository;
 
-	public ResponseEntity<HistoryUsers> createHistoryUsers(long history_id, long user_id, String type) {
-		try {
-			HistoryUsers historyUser = new HistoryUsers();
-			HistoryUsersKey key = new HistoryUsersKey(history_id, user_id);
-			historyUser.setId_historyUsers(key);
-			historyUser.setUserType(type);
-			return new ResponseEntity<>(historyUsersRepository.save(historyUser), HttpStatus.CREATED);
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
-		}
+	public HistoryUsers createHistoryUsers(long userId, long historyId, String type) {
+		HistoryUsers historyUser = new HistoryUsers();
+		HistoryUsersKey key = new HistoryUsersKey(historyId, userId);
+		historyUser.setId_historyUsers(key);
+		historyUser.setUserType(type);
+		return historyUsersRepository.save(historyUser);
 	}
 
-	public ResponseEntity<List<HistoryUsers>> getByHistoryKey(long historyId) {
-		HistoryUsers _historyUser = new HistoryUsers();
+	public List<HistoryUsers> searchByHistoryKey(long historyId) {
+		HistoryUsers historyUser = new HistoryUsers();
 		HistoryUsersKey key = new HistoryUsersKey();
 
-		_historyUser.setId_historyUsers(key);
+		historyUser.setId_historyUsers(key);
 		key.setId_history(historyId);
-		return getByKey(_historyUser);
+
+		return getByKey(historyUser);
 	}
 
-	public ResponseEntity<List<HistoryUsers>> getByCurrentUserKey(long user_id) {
+	public List<HistoryUsers> getByCurrentUserKey(long user_id) {
 		return getByUserKey(user_id, "currentUser");
 	}
 
-	public ResponseEntity<List<HistoryUsers>> getByFirstUserKey(long user_id) {
+	public List<HistoryUsers> getByFirstUserKey(long user_id) {
 		return getByUserKey(user_id, "firstUser");
 	}
 
-	private ResponseEntity<List<HistoryUsers>> getByUserKey(long user_id, String type) {
+	private List<HistoryUsers> getByUserKey(long user_id, String type) {
 		HistoryUsers _historyUser = new HistoryUsers();
 		HistoryUsersKey key = new HistoryUsersKey();
 
@@ -75,12 +73,12 @@ public class HistoryUsersService {
 				}
 			}
 			if (type.equals("currentUser")){
-				return new ResponseEntity<>(currentUsersList, HttpStatus.OK);
+				return currentUsersList;
 			} else {
-				return new ResponseEntity<>(firstUsersList, HttpStatus.OK);
+				return firstUsersList;
 			}
 		}
-		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		throw new CustomException("The historyUser doesn't exist", HttpStatus.NOT_FOUND);
 	}
 
 	public ResponseEntity<HistoryUsers> updateHistoryUsers(long user_id, long history_id) {
@@ -134,17 +132,14 @@ public class HistoryUsersService {
 		return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
 	}
 
-	private ResponseEntity<List<HistoryUsers>> getByKey(HistoryUsers _historyUser) {
-		Example<HistoryUsers> historyExample = Example.of(_historyUser);
 
-		try {
-			List<HistoryUsers> _results = historyUsersRepository.findAll(historyExample);
-			if (_results.isEmpty()) {
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			}
-			return new ResponseEntity<>(_results, HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+	private List<HistoryUsers> getByKey(HistoryUsers historyUser) {
+		Example<HistoryUsers> historyExample = Example.of(historyUser);
+
+		List<HistoryUsers> results = historyUsersRepository.findAll(historyExample);
+		if (results.isEmpty()) {
+			throw new CustomException("The history user doesn't exist", HttpStatus.NOT_FOUND);
 		}
+		return results;
 	}
 }
