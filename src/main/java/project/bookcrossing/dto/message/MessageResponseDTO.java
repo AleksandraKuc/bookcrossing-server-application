@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModelProperty;
 import project.bookcrossing.entity.Conversation;
 import project.bookcrossing.entity.User;
 
-import javax.persistence.*;
 import java.util.Date;
 
 public class MessageResponseDTO {

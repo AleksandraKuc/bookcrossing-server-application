@@ -2,15 +2,14 @@ package project.bookcrossing.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 import project.bookcrossing.entity.Conversation;
 import project.bookcrossing.entity.Message;
 import project.bookcrossing.entity.User;
 import project.bookcrossing.exception.CustomException;
 import project.bookcrossing.repository.MessageRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,14 +20,13 @@ public class MessageService {
 	private MessageRepository messageRepository;
 
 	public Message createMessage(Message message, User user, Conversation conversation) {
-		if (conversation.getFirstUser().getId() == user.getId() ||
-				conversation.getSecondUser().getId() == user.getId() ) {
+		if (conversation.getFirstUser().getId() != user.getId() &&
+				conversation.getSecondUser().getId() != user.getId() ) {
 			throw new CustomException("User doesn't belong to this conversation", HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 		message.setSender(user);
 		message.setConversation(conversation);
 		return messageRepository.save(message);
-//		return messageRepository.save(new Message(message.getContent(), user, conversation));
 	}
 
 	public List<Message> searchByConversation(Conversation conversation) {

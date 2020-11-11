@@ -3,16 +3,16 @@ package project.bookcrossing.controller;
 import io.swagger.annotations.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import project.bookcrossing.dto.book.BookResponseDTO;
 import project.bookcrossing.dto.favouriteBooks.FavouriteBooksResponseDTO;
-import project.bookcrossing.dto.user.UserDataDTO;
 import project.bookcrossing.dto.user.UserResponseDTO;
+import project.bookcrossing.entity.Book;
 import project.bookcrossing.entity.FavouriteBooks;
 import project.bookcrossing.entity.FavouritesKey;
-import project.bookcrossing.entity.User;
+import project.bookcrossing.service.BookService;
 import project.bookcrossing.service.FavouriteBooksService;
 
 import java.util.ArrayList;
@@ -24,6 +24,8 @@ public class FavouriteBooksController {
 
 	@Autowired
 	private FavouriteBooksService favouriteBooksService;
+	@Autowired
+	private BookService bookService;
 	@Autowired
 	private ModelMapper modelMapper;
 
@@ -44,11 +46,12 @@ public class FavouriteBooksController {
 	@ApiResponses(value = {//
 			@ApiResponse(code = 400, message = "Something went wrong"), //
 			@ApiResponse(code = 404, message = "The user doesn't exist")})
-	public List<FavouriteBooksResponseDTO> search(@ApiParam("UserId") @PathVariable long userId) {
-		List<FavouriteBooks> books = favouriteBooksService.search(userId);
-		List<FavouriteBooksResponseDTO> response = new ArrayList<>();
-		for (FavouriteBooks book : books) {
-			response.add(modelMapper.map(book, FavouriteBooksResponseDTO.class));
+	public List<BookResponseDTO> search(@ApiParam("UserId") @PathVariable long userId) {
+		List<FavouriteBooks> favourites = favouriteBooksService.search(userId);
+		List<BookResponseDTO> response = new ArrayList<>();
+		for (FavouriteBooks favourite : favourites) {
+			Book book = bookService.searchById(favourite.getId_favouriteBooks().getId_book());
+			response.add(modelMapper.map(book, BookResponseDTO.class));
 		}
 		return response;
 	}
@@ -77,7 +80,7 @@ public class FavouriteBooksController {
 			@ApiResponse(code = 500, message = "Expired or invalid JWT token")})
 	public void deleteByBook(@ApiParam("BookId") @PathVariable long bookId) {
 		FavouritesKey key = new FavouritesKey();
-		key.setId_user(bookId);
+		key.setId_book(bookId);
 		favouriteBooksService.deleteFromList(key);
 	}
 

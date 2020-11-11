@@ -3,13 +3,12 @@ package project.bookcrossing.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
+
 import project.bookcrossing.entity.Role;
 import project.bookcrossing.entity.User;
 import project.bookcrossing.exception.CustomException;
@@ -17,7 +16,6 @@ import project.bookcrossing.repository.UserRepository;
 import project.bookcrossing.security.JwtTokenProvider;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 

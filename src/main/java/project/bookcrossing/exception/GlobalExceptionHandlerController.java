@@ -20,7 +20,6 @@ public class GlobalExceptionHandlerController {
 	@Bean
 	public ErrorAttributes errorAttributes() {
 		// Hide exception field in the return object
-		System.out.println("errorAttributes");
 		return new DefaultErrorAttributes() {
 			@Override
 			public Map<String, Object> getErrorAttributes(WebRequest webRequest, boolean includeStackTrace) {
@@ -33,19 +32,16 @@ public class GlobalExceptionHandlerController {
 
 	@ExceptionHandler(CustomException.class)
 	public void handleCustomException(HttpServletResponse res, CustomException ex) throws IOException {
-		System.out.println("handleCustomException");
 		res.sendError(ex.getHttpStatus().value(), ex.getMessage());
 	}
 
 	@ExceptionHandler(AccessDeniedException.class)
 	public void handleAccessDeniedException(HttpServletResponse res) throws IOException {
-		System.out.println("handleAccessDeniedException");
 		res.sendError(HttpStatus.FORBIDDEN.value(), "Access denied");
 	}
 
 	@ExceptionHandler(Exception.class)
 	public void handleException(HttpServletResponse res) throws IOException {
-		System.out.println("handleException");
 		res.sendError(HttpStatus.BAD_REQUEST.value(), "Something went wrong");
 	}
 

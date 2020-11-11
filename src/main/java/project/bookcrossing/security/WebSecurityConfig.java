@@ -23,7 +23,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		System.out.println("configure http sec");
 
 		// Disable CSRF (cross site request forgery)
 		http.csrf().disable();
@@ -52,7 +51,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-		System.out.println("configure web sec");
 // Allow swagger to be accessed without authentication
 		web.ignoring().antMatchers("/v2/api-docs")//
 				.antMatchers("/swagger-resources/**")//
@@ -69,14 +67,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
-		System.out.println("passwordEncoder");
 		return new BCryptPasswordEncoder(12);
 	}
 
 	@Override
 	@Bean
 	public AuthenticationManager authenticationManagerBean() throws Exception {
-		System.out.println("authenticationManagerBean");
 		return super.authenticationManagerBean();
 	}
 

@@ -47,7 +47,6 @@ public class JwtTokenProvider {
 	}
 
 	public String createToken(String username, List<Role> roles) {
-		System.out.println("createToken");
 
 		Claims claims = Jwts.claims().setSubject(username);
 		claims.put("auth", roles.stream().map(s -> new SimpleGrantedAuthority(s.getAuthority())).filter(Objects::nonNull).collect(Collectors.toList()));
@@ -64,20 +63,16 @@ public class JwtTokenProvider {
 	}
 
 	public Authentication getAuthentication(String token) {
-		System.out.println("getAuthentication");
 		UserDetails userDetails = myUserDetails.loadUserByUsername(getUsername(token));
 		return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
 	}
 
 	public String getUsername(String token) {
-		System.out.println("getUsername");
 		return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
 	}
 
 	public String resolveToken(HttpServletRequest req) {
-		System.out.println("resolveToken");
 		String bearerToken = req.getHeader("Authorization");
-		System.out.println(bearerToken);
 		if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
 			return bearerToken.substring(7);
 		}
@@ -85,7 +80,6 @@ public class JwtTokenProvider {
 	}
 
 	public boolean validateToken(String token) {
-		System.out.println("validateToken");
 		try {
 			Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
 			return true;

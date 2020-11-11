@@ -3,11 +3,10 @@ package project.bookcrossing.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 import project.bookcrossing.entity.HistoryUsers;
 import project.bookcrossing.entity.HistoryUsersKey;
-import project.bookcrossing.entity.User;
 import project.bookcrossing.exception.CustomException;
 import project.bookcrossing.repository.HistoryUsersRepository;
 
@@ -74,21 +73,17 @@ public class HistoryUsersService {
 	}
 
 	public void deleteByHistory(long history_id) {
-		System.out.println("deleting history");
 		HistoryUsers historyUser = new HistoryUsers();
 		HistoryUsersKey key = new HistoryUsersKey(history_id);
 		historyUser.setId_historyUsers(key);
-		System.out.println("deleting By List");
 		this.deleteList(historyUser);
 	}
 
 	// helper methods
 
 	private void deleteList(HistoryUsers historyUser){
-		System.out.println("del history step 2");
 		Example<HistoryUsers> historyExample = Example.of(historyUser);
 		List<HistoryUsers> _users = historyUsersRepository.findAll(historyExample);
-		System.out.println(_users.toString());
 		for (HistoryUsers us : _users) {
 			historyUsersRepository.deleteById(us.getId_historyUsers());
 		}

@@ -52,4 +52,11 @@ public class Conversation {
 		this.conversationUsers.set(1, secondUser);
 	}
 
+	@Override
+	public String toString() {
+		return "Conversation{" +
+				"id_conversation=" + id_conversation +
+				", conversationUsers=" + conversationUsers +
+				'}';
+	}
 }

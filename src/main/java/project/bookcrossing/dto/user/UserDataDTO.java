@@ -3,6 +3,7 @@ package project.bookcrossing.dto.user;
 import java.util.List;
 
 import io.swagger.annotations.ApiModelProperty;
+
 import project.bookcrossing.entity.Role;
 
 public class UserDataDTO {

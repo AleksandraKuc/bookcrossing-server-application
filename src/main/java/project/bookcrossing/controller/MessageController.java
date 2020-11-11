@@ -3,14 +3,11 @@ package project.bookcrossing.controller;
 import io.swagger.annotations.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 import project.bookcrossing.dto.message.MessageDataDTO;
 import project.bookcrossing.dto.message.MessageResponseDTO;
-import project.bookcrossing.dto.user.UserDataDTO;
-import project.bookcrossing.dto.user.UserResponseDTO;
 import project.bookcrossing.entity.Conversation;
 import project.bookcrossing.entity.Message;
 import project.bookcrossing.entity.User;
@@ -76,7 +73,7 @@ public class MessageController {
 		return modelMapper.map(messageService.searchLastByConversation(conversation), MessageResponseDTO.class);
 	}
 
-	@DeleteMapping(value = "/{messageId}")
+	@DeleteMapping(value = "/delete/{messageId}")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
 	@ApiOperation(value = "${MessageController.delete}", authorizations = { @Authorization(value="apiKey") })
 	@ApiResponses(value = {//
@@ -88,7 +85,7 @@ public class MessageController {
 		messageService.deleteMessage(messageId);
 	}
 
-	@DeleteMapping(value = "/{conversationId}")
+	@DeleteMapping(value = "/deleteByConversation/{conversationId}")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
 	@ApiOperation(value = "${MessageController.deleteByConversation}", authorizations = { @Authorization(value="apiKey") })
 	@ApiResponses(value = {//

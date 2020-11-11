@@ -6,10 +6,6 @@ import java.util.List;
 import io.swagger.annotations.ApiModelProperty;
 import project.bookcrossing.entity.Role;
 
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.FetchType;
-
 public class UserResponseDTO {
 
 	@ApiModelProperty(position = 0)

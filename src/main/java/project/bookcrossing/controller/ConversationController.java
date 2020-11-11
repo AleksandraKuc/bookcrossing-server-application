@@ -3,13 +3,10 @@ package project.bookcrossing.controller;
 import io.swagger.annotations.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 import project.bookcrossing.dto.conversation.ConversationResponseDTO;
-import project.bookcrossing.dto.user.UserDataDTO;
-import project.bookcrossing.dto.user.UserResponseDTO;
 import project.bookcrossing.entity.Conversation;
 import project.bookcrossing.entity.User;
 import project.bookcrossing.service.ConversationService;

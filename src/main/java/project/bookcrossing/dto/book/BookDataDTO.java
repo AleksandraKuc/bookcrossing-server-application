@@ -1,6 +1,7 @@
 package project.bookcrossing.dto.book;
 
 import io.swagger.annotations.ApiModelProperty;
+
 import project.bookcrossing.entity.BookCategory;
 
 public class BookDataDTO {

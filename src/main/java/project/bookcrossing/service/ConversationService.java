@@ -2,13 +2,13 @@ package project.bookcrossing.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import project.bookcrossing.entity.Conversation;
 import project.bookcrossing.entity.User;
 import project.bookcrossing.exception.CustomException;
 import project.bookcrossing.repository.ConversationRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,11 +21,11 @@ public class ConversationService {
 	private MessageService messageService;
 
 	public Conversation createConversation(User firstUser, User secondUser) {
-//		if (!conversationRepository.existsByFirstUserAndSecondUser(firstUser, secondUser)) {
+		if (!checkIfExists(firstUser, secondUser)) {
 			return conversationRepository.save(new Conversation(firstUser, secondUser));
-//		} else {
-//			throw new CustomException("Conversation is already created", HttpStatus.UNPROCESSABLE_ENTITY);
-//		}
+		} else {
+			throw new CustomException("Conversation is already created", HttpStatus.UNPROCESSABLE_ENTITY);
+		}
 	}
 
 	public List<Conversation> searchByUser(User user) {
@@ -57,5 +57,16 @@ public class ConversationService {
 				deleteConversation(item);
 			}
 		}
+	}
+
+	private boolean checkIfExists(User first, User second) {
+		List<Conversation> conversations = searchByUser(first);
+		for (Conversation conv : conversations) {
+			if ((conv.getFirstUser().getId() == first.getId() && conv.getSecondUser().getId() == second.getId()) ||
+					(conv.getFirstUser().getId() == second.getId() && conv.getSecondUser().getId() == first.getId())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

@@ -1,6 +1,7 @@
 package project.bookcrossing.dto.conversation;
 
 import io.swagger.annotations.ApiModelProperty;
+
 import project.bookcrossing.entity.User;
 
 import java.util.List;

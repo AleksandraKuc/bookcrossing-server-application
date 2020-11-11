@@ -3,9 +3,8 @@ package project.bookcrossing.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import project.bookcrossing.dto.favouriteBooks.FavouriteBooksResponseDTO;
+
 import project.bookcrossing.entity.*;
 import project.bookcrossing.exception.CustomException;
 import project.bookcrossing.repository.FavouriteBooksRepository;
@@ -46,13 +45,13 @@ public class FavouriteBooksService {
 		FavouriteBooks book = new FavouriteBooks();
 		book.setId_favouriteBooks(fav_key);
 		List<FavouriteBooks> books = getByKey(book);
+
 		for (FavouriteBooks item : books) {
 			deleteByKey(item.getId_favouriteBooks());
 		}
 	}
 
 	public void deleteByKey(FavouritesKey fav_key) {
-		System.out.println("deleting favs by key");
 		favouriteRepository.deleteById(fav_key);
 	}
 
