@@ -5,10 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import project.bookcrossing.entity.BookHistory;
-import project.bookcrossing.entity.User;
-import project.bookcrossing.exception.CustomException;
 import project.bookcrossing.repository.BookHistoryRepository;
 
+import java.util.Date;
 import java.util.Optional;
 
 
@@ -18,32 +17,40 @@ public class BookHistoryService {
 	@Autowired
 	private BookHistoryRepository historyRepository;
 
-	public BookHistory createHistory() {
-		return historyRepository.save(new BookHistory());
+	public ResponseEntity<BookHistory> createHistory() {
+		try {
+			BookHistory _bookHistory = historyRepository.save(new BookHistory());
+			return new ResponseEntity<>(_bookHistory, HttpStatus.CREATED);
+		} catch (Exception e) {
+			return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
+		}
 	}
 
-	public BookHistory searchById(long id) {
+	public ResponseEntity<BookHistory> getHistoryById(long id) {
 		Optional<BookHistory> history = historyRepository.findById(id);
-		if (history.isEmpty()) {
-			throw new CustomException("The history doesn't exist", HttpStatus.NOT_FOUND);
-		}
-		return history.get();
+		return history.map(_history -> new ResponseEntity<>(_history, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 
-	public BookHistory updateHistory(long historyId) {
+	public ResponseEntity<BookHistory> updateHistory(long history_id) {
 
-		Optional<BookHistory> historyData = historyRepository.findById(historyId);
+		Optional<BookHistory> historyData = historyRepository.findById(history_id);
 
-		if (historyData.isEmpty()) {
-			throw new CustomException("The history doesn't exist", HttpStatus.NOT_FOUND);
+		if (historyData.isPresent()) {
+
+			BookHistory _history = historyData.get();
+			_history.setLast_hire();
+			return new ResponseEntity<>(historyRepository.save(_history), HttpStatus.OK);
 		} else {
-			BookHistory history = historyData.get();
-			history.setLast_hire();
-			return historyRepository.save(history);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 
-	public void deleteHistory(long historyId) {
-		historyRepository.deleteById(historyId);
+	public ResponseEntity<HttpStatus> deleteHistory(long history_id) {
+		try {
+			historyRepository.deleteById(history_id);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
+		}
 	}
 }

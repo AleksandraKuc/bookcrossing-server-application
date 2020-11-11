@@ -1,12 +1,10 @@
 package project.bookcrossing.controller;
 
-import io.swagger.annotations.*;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import project.bookcrossing.dto.bookHistory.BookHistoryResponseDTO;
+import project.bookcrossing.entity.BookHistory;
 import project.bookcrossing.service.BookHistoryService;
 
 @RestController
@@ -15,47 +13,24 @@ public class BookHistoryController {
 
 	@Autowired
 	private BookHistoryService historyService;
-	@Autowired
-	private ModelMapper modelMapper;
 
-	@PostMapping("/create")
-	@ApiOperation(value = "${BookHistoryController.createHistory}")
-	@ApiResponses(value = {//
-			@ApiResponse(code = 400, message = "Something went wrong"), //
-			@ApiResponse(code = 403, message = "Access denied")})
-	public BookHistoryResponseDTO createHistory() {
-		return modelMapper.map(historyService.createHistory(), BookHistoryResponseDTO.class);
+	@PostMapping(value = "/create")
+	public ResponseEntity<BookHistory> createHistory() {
+		return historyService.createHistory();
 	}
 
-	@GetMapping(value = "/id/{id}")
-	@ApiOperation(value = "${BookHistoryController.searchById}", response = BookHistoryResponseDTO.class)
-	@ApiResponses(value = {//
-			@ApiResponse(code = 400, message = "Something went wrong"), //
-			@ApiResponse(code = 404, message = "The user doesn't exist")})
-	public BookHistoryResponseDTO searchById(@ApiParam("Id") @PathVariable long id) {
-		return modelMapper.map(historyService.searchById(id), BookHistoryResponseDTO.class);
+	@GetMapping(value = "/getHistory/{history_id}")
+	public ResponseEntity<BookHistory> getBookDetails(@PathVariable long history_id) {
+		return historyService.getHistoryById(history_id);
 	}
 
-	@PutMapping("/update/{historyId}")
-	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
-	@ApiOperation(value = "${BookHistoryController.update}")
-	@ApiResponses(value = {//
-			@ApiResponse(code = 400, message = "Something went wrong"), //
-			@ApiResponse(code = 403, message = "Access denied")})
-	public BookHistoryResponseDTO update(@ApiParam("HistoryId") @PathVariable long historyId) {
-		return modelMapper.map(historyService.updateHistory(historyId), BookHistoryResponseDTO.class);
+	@PutMapping(value = "/update/{history_id}")
+	public ResponseEntity<BookHistory> updateBook(@PathVariable long history_id) {
+		return historyService.updateHistory(history_id);
 	}
 
-	@DeleteMapping(value = "/{historyId}")
-	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
-	@ApiOperation(value = "${BookHistoryController.delete}", authorizations = { @Authorization(value="apiKey") })
-	@ApiResponses(value = {//
-			@ApiResponse(code = 400, message = "Something went wrong"), //
-			@ApiResponse(code = 403, message = "Access denied"), //
-			@ApiResponse(code = 404, message = "The user doesn't exist"), //
-			@ApiResponse(code = 500, message = "Expired or invalid JWT token")})
-	public long delete(@ApiParam("HistoryId") @PathVariable long historyId) {
-		historyService.deleteHistory(historyId);
-		return historyId;
+	@DeleteMapping(value = "/delete/{history_id}")
+	public ResponseEntity<HttpStatus> deleteHistory(@PathVariable long history_id) {
+		return historyService.deleteHistory(history_id);
 	}
 }

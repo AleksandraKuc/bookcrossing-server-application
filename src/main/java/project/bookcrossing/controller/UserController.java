@@ -52,11 +52,12 @@ public class UserController {
 			@ApiResponse(code = 403, message = "Access denied"), //
 			@ApiResponse(code = 422, message = "Username is already in use")})
 	public String signup(@ApiParam("Signup User") @RequestBody UserDataDTO user) {
+		System.out.println("controller");
 		return userService.signup(modelMapper.map(user, User.class));
 	}
 
 	@DeleteMapping(value = "/{username}")
-	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@ApiOperation(value = "${UserController.delete}", authorizations = { @Authorization(value="apiKey") })
 	@ApiResponses(value = {//
 			@ApiResponse(code = 400, message = "Something went wrong"), //
@@ -124,7 +125,7 @@ public class UserController {
 
 	@PutMapping("/update")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
-	@ApiOperation(value = "${UserController.update}")
+	@ApiOperation(value = "${UserController.update}", authorizations = { @Authorization(value="apiKey")})
 	@ApiResponses(value = {//
 			@ApiResponse(code = 400, message = "Something went wrong"), //
 			@ApiResponse(code = 403, message = "Access denied"), //

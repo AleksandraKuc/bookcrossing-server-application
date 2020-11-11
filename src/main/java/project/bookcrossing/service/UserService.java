@@ -69,6 +69,7 @@ public class UserService {
 			user.setId(userData.getId());
 			user.setStartDate(userData.getStartDate());
 			user.setAddedBooks(userData.getAddedBooks());
+			System.out.println(user.toString());
 			userRepository.save(user);
 			return jwtTokenProvider.createToken(user.getUsername(), user.getRoles());
 		} else {

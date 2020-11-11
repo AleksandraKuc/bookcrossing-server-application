@@ -22,14 +22,14 @@ public class ConversationController {
 
 	@PostMapping(value = "/create/{user_id}/{recipient_id}")
 	public ResponseEntity<Conversation> postConversation(@PathVariable long user_id, @PathVariable long recipient_id) {
-		User firstUser = userService.getUserById(user_id).getBody();
-		User secondUser = userService.getUserById(recipient_id).getBody();
+		User firstUser = userService.searchById(user_id);
+		User secondUser = userService.searchById(recipient_id);
 		return conversationService.createConversation(firstUser, secondUser);
 	}
 
 	@GetMapping(value = "/getByUser/{user_id}")
 	public ResponseEntity<List<Conversation>> getByUser(@PathVariable long user_id){
-		User user = userService.getUserById(user_id).getBody();
+		User user = userService.searchById(user_id);
 		return conversationService.getConversationsByUser(user);
 	}
 
@@ -40,7 +40,7 @@ public class ConversationController {
 
 	@DeleteMapping("/deleteByUser/{user_id}")
 	public ResponseEntity<HttpStatus> deleteConversationsByUser(@PathVariable long user_id) {
-		User user = userService.getUserById(user_id).getBody();
+		User user = userService.searchById(user_id);
 		return conversationService.deleteConversationByUser(user);
 	}
 }
