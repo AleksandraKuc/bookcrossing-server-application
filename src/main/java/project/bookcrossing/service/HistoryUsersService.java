@@ -65,10 +65,6 @@ public class HistoryUsersService {
 		return createHistoryUsers(historyId, userId, "currentUser");
 	}
 
-	private void updateBook(long historyId) {
-
-	}
-
 	public void deleteByUser(long user_id) {
 		HistoryUsers historyUser = new HistoryUsers();
 		HistoryUsersKey key = new HistoryUsersKey();
@@ -78,16 +74,21 @@ public class HistoryUsersService {
 	}
 
 	public void deleteByHistory(long history_id) {
+		System.out.println("deleting history");
 		HistoryUsers historyUser = new HistoryUsers();
 		HistoryUsersKey key = new HistoryUsersKey(history_id);
 		historyUser.setId_historyUsers(key);
+		System.out.println("deleting By List");
 		this.deleteList(historyUser);
 	}
 
 	// helper methods
 
 	private void deleteList(HistoryUsers historyUser){
-		List<HistoryUsers> _users = getByKey(historyUser);
+		System.out.println("del history step 2");
+		Example<HistoryUsers> historyExample = Example.of(historyUser);
+		List<HistoryUsers> _users = historyUsersRepository.findAll(historyExample);
+		System.out.println(_users.toString());
 		for (HistoryUsers us : _users) {
 			historyUsersRepository.deleteById(us.getId_historyUsers());
 		}

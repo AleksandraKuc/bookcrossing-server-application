@@ -6,7 +6,7 @@ import project.bookcrossing.entity.BookCategory;
 public class BookDataDTO {
 
 	@ApiModelProperty(position = 0)
-	private long id;
+	private long id_book;
 	@ApiModelProperty(position = 1)
 	private String title;
 	@ApiModelProperty(position = 2)
@@ -18,12 +18,12 @@ public class BookDataDTO {
 	@ApiModelProperty(position = 5)
 	private BookCategory category;
 
-	public long getId() {
-		return id;
+	public long getId_book() {
+		return id_book;
 	}
 
-	public void setId(long id) {
-		this.id = id;
+	public void setId_book(long id) {
+		this.id_book = id;
 	}
 
 	public String getTitle() {
@@ -69,7 +69,8 @@ public class BookDataDTO {
 	@Override
 	public String toString() {
 		return "BookDataDTO{" +
-				"title='" + title + '\'' +
+				"id=" + id_book +
+				", title='" + title + '\'' +
 				", author='" + author + '\'' +
 				", description='" + description + '\'' +
 				", ISBN='" + ISBN + '\'' +

@@ -47,6 +47,7 @@ public class BookHistoryService {
 	}
 
 	public void deleteHistory(long historyId) {
+		System.out.println("removing bookHistory");
 		historyRepository.deleteById(historyId);
 	}
 

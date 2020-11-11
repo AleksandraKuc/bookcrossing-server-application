@@ -41,8 +41,6 @@ public class UserController {
 			@ApiResponse(code = 422, message = "Invalid username/password supplied")})
 	public String login(@ApiParam("Username") @RequestParam String username, //
 						@ApiParam("Password") @RequestParam String password) {
-
-		System.out.println("try");
 		return userService.signin(username, password);
 	}
 

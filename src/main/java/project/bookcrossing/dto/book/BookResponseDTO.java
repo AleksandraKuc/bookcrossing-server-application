@@ -7,17 +7,23 @@ import project.bookcrossing.entity.BookHistory;
 public class BookResponseDTO {
 
 	@ApiModelProperty(position = 0)
-	private String title;
+	private long id_book;
 	@ApiModelProperty(position = 1)
-	private String author;
+	private String title;
 	@ApiModelProperty(position = 2)
-	private String description;
+	private String author;
 	@ApiModelProperty(position = 3)
-	private String ISBN;
+	private String description;
 	@ApiModelProperty(position = 4)
-	private BookCategory category;
+	private String ISBN;
 	@ApiModelProperty(position = 5)
+	private BookCategory category;
+	@ApiModelProperty(position = 6)
 	private BookHistory history;
+
+	public long getId_book() { return id_book; }
+
+	public void setId_book(long id_book) { this.id_book = id_book; }
 
 	public String getTitle() {
 		return title;

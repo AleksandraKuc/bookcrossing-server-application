@@ -86,7 +86,7 @@ public class BookService {
 			book.setHistory(bookData.getHistory());
 			return bookRepository.save(book);
 		} else {
-			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);
+			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
 		}
 	}
 
@@ -102,6 +102,9 @@ public class BookService {
 		BookHistory history = bookData.get().getHistory();
 		historyService.updateHistory(history.getId_history());
 		bookData = bookRepository.findById(bookId);
+		if (bookData.isEmpty()) {
+			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
+		}
 		return bookData.get();
 
 	}

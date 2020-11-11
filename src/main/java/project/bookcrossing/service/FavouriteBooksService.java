@@ -35,7 +35,11 @@ public class FavouriteBooksService {
 
 		book.setId_favouriteBooks(key);
 		key.setId_user(userId);
-		return getByKey(book);
+		List<FavouriteBooks> results = getByKey(book);
+		if (results.isEmpty()) {
+			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);
+		}
+		return results;
 	}
 
 	public void deleteFromList(FavouritesKey fav_key){
@@ -48,17 +52,13 @@ public class FavouriteBooksService {
 	}
 
 	public void deleteByKey(FavouritesKey fav_key) {
+		System.out.println("deleting favs by key");
 		favouriteRepository.deleteById(fav_key);
 	}
 
 	private List<FavouriteBooks> getByKey(FavouriteBooks _favBook) {
 		Example<FavouriteBooks> favouriteExample = Example.of(_favBook);
 
-		List<FavouriteBooks> results = favouriteRepository.findAll(favouriteExample);
-
-		if (results.isEmpty()) {
-			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);
-		}
-		return results;
+		return favouriteRepository.findAll(favouriteExample);
 	}
 }

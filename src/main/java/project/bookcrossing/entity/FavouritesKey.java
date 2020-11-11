@@ -40,4 +40,11 @@ public class FavouritesKey implements Serializable {
 		this.id_user = id_user;
 	}
 
+	@Override
+	public String toString() {
+		return "FavouritesKey{" +
+				"id_book=" + id_book +
+				", id_user=" + id_user +
+				'}';
+	}
 }

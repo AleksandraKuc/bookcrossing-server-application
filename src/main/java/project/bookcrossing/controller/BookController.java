@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/book")
+@RequestMapping(value = "/api/book")
 public class BookController {
 
 	@Autowired
@@ -172,7 +172,7 @@ public class BookController {
 
 		FavouritesKey key = new FavouritesKey(bookId);
 		//delete records from favourites_books
-		favouriteBooksService.deleteByKey(key);
+		favouriteBooksService.deleteFromList(key);
 
 		//delete book
 		bookService.delete(bookId);
