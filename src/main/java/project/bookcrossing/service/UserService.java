@@ -3,13 +3,19 @@ package project.bookcrossing.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import project.bookcrossing.entity.User;
-import project.bookcrossing.repository.UserRepository;
 
-import java.util.Date;
+import project.bookcrossing.entity.Role;
+import project.bookcrossing.entity.User;
+import project.bookcrossing.exception.CustomException;
+import project.bookcrossing.repository.UserRepository;
+import project.bookcrossing.security.JwtTokenProvider;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,75 +25,106 @@ public class UserService {
 	@Autowired
 	private UserRepository userRepository;
 
-	public ResponseEntity<User> getUserById(long id) {
-		Optional<User> userData = userRepository.findById(id);
-		return userData.map(user -> new ResponseEntity<>(user, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-	}
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
-	public ResponseEntity<User> getUserByUsername(String username) {
-		Optional<User> userData = userRepository.findByUsername(username);
-		return userData.map(user -> new ResponseEntity<>(user, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-	}
+	@Autowired
+	private JwtTokenProvider jwtTokenProvider;
 
-	public ResponseEntity<List<User>> getUserByNames(String firstName, String lastName){
+	@Autowired
+	private AuthenticationManager authenticationManager;
 
+	public String signin(String username, String password) {
 		try {
-			List<User> _results = userRepository.findByFirstNameAndLastName(firstName, lastName);
-			if (_results.isEmpty()) {
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			}
-			return new ResponseEntity<>(_results, HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+			return jwtTokenProvider.createToken(username, userRepository.findByUsername(username).getRoles());
+		} catch (AuthenticationException e) {
+			throw new CustomException("Invalid username/password supplied", HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 	}
 
-	public ResponseEntity<List<User>> getAllUsers() {
-		try {
-			List<User> users = (List<User>) userRepository.findAll();
-
-			if (users.isEmpty()) {
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			}
-			return new ResponseEntity<>(users, HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-
-	public ResponseEntity<User> postUser(User user){
-		try {
-			return new ResponseEntity<>(userRepository.save(user), HttpStatus.CREATED);
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-
-	public ResponseEntity<HttpStatus> deleteUser(long id) {
-		try {
-			userRepository.deleteById(id);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-
-	public ResponseEntity<User> updateUser(long id, User user) {
-		Optional<User> userData = userRepository.findById(id);
-		System.out.println(user);
-		if (userData.isPresent()) {
-			User _user = userData.get();
-			_user.setUsername(user.getUsername() != null ? user.getUsername() : _user.getUsername());
-			_user.setPassword(user.getPassword() != null ? user.getPassword() : _user.getPassword());
-			_user.setFirstName(user.getFirstName() != null ? user.getFirstName() : _user.getFirstName());
-			_user.setLastName(user.getLastName() != null ? user.getLastName() : _user.getLastName());
-			_user.setEmail(user.getEmail() != null ? user.getEmail() : _user.getEmail());
-			_user.setCity(user.getCity() != null ? user.getCity() : _user.getCity());
-			_user.setProvince(user.getProvince() != null ? user.getProvince() : _user.getProvince());
-			_user.setPhoneNumber(user.getPhoneNumber() != 0 ? user.getPhoneNumber() : _user.getPhoneNumber());
-			return new ResponseEntity<>(userRepository.save(_user), HttpStatus.OK);
+	public String signup(User user) {
+		if (!userRepository.existsByUsername(user.getUsername())) {
+			user.setPassword(passwordEncoder.encode(user.getPassword()));
+			userRepository.save(user);
+			return jwtTokenProvider.createToken(user.getUsername(), user.getRoles());
 		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			throw new CustomException("Username is already in use", HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 	}
+
+	public String update(User user) {
+		User userData = userRepository.findByUsername(user.getUsername());
+		if(userData != null){
+			user.setUsername(user.getUsername() != null ? user.getUsername() : userData.getUsername());
+			user.setFirstName(user.getFirstName() != null ? user.getFirstName() : userData.getFirstName());
+			user.setLastName(user.getLastName() != null ? user.getLastName() : userData.getLastName());
+			user.setEmail(user.getEmail() != null ? user.getEmail() : userData.getEmail());
+			user.setCity(user.getCity() != null ? user.getCity() : userData.getCity());
+			user.setProvince(user.getProvince() != null ? user.getProvince() : userData.getProvince());
+			user.setPhoneNumber(user.getPhoneNumber() != 0 ? user.getPhoneNumber() : userData.getPhoneNumber());
+			user.setPassword(userData.getPassword());
+			user.setId(userData.getId());
+			user.setStartDate(userData.getStartDate());
+			user.setAddedBooks(userData.getAddedBooks());
+			userRepository.save(user);
+			return jwtTokenProvider.createToken(user.getUsername(), user.getRoles());
+		} else {
+			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);
+		}
+	}
+
+	public void delete(String username) {
+		userRepository.deleteByUsername(username);
+	}
+
+	public User search(String username) {
+		User user = userRepository.findByUsername(username);
+		if (user == null) {
+			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);
+		}
+		return user;
+	}
+
+	public User searchById(long id) {
+		Optional<User> user = userRepository.findById(id);
+		if (user.isEmpty()) {
+			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);
+		}
+		return user.get();
+	}
+
+	public List<User> searchByNames(String firstname, String lastname) {
+		List<User> users = userRepository.findByFirstNameAndLastName(firstname, lastname);
+		if (users.isEmpty()) {
+			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);
+		}
+		return users;
+	}
+
+	public User whoami(HttpServletRequest req) {
+		return userRepository.findByUsername(jwtTokenProvider.getUsername(jwtTokenProvider.resolveToken(req)));
+	}
+
+	public String refresh(String username) {
+		return jwtTokenProvider.createToken(username, userRepository.findByUsername(username).getRoles());
+	}
+
+	public List<User> getAllUsers() {
+		List<User> users = (List<User>) userRepository.findAll();
+		for (User user : users) {
+			List<Role> roles = user.getRoles();
+			for (Role role : roles) {
+				if (role.equals(Role.ROLE_ADMIN)){
+					users.remove(user);
+				}
+				break;
+			}
+		}
+		if (users.isEmpty()) {
+			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);
+		}
+		return users;
+	}
+
 }

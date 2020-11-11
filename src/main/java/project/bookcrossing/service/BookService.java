@@ -2,13 +2,13 @@ package project.bookcrossing.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import project.bookcrossing.entity.Book;
-import project.bookcrossing.entity.BookCategory;
-import project.bookcrossing.entity.BookHistory;
+
+import project.bookcrossing.entity.*;
+import project.bookcrossing.exception.CustomException;
 import project.bookcrossing.repository.BookRepository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,112 +20,98 @@ public class BookService {
 	@Autowired
 	private BookHistoryService historyService;
 
-	public ResponseEntity<Book> createBook(Book book) {
-		try {
-			Book _book = bookRepository.save(book);
-			return new ResponseEntity<>(_book, HttpStatus.CREATED);
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
+	public Book create(Book book) {
+		BookHistory bookHistory = new BookHistory(new Date(), new Date());
+		book.setHistory(bookHistory);
+		return bookRepository.save(book);
+	}
+
+	public List<Book> getAllBooks() {
+		List<Book> books = (List<Book>) bookRepository.findAll();
+		if (books.isEmpty()) {
+			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
 		}
+		return books;
 	}
 
-	public ResponseEntity<List<Book>> getBooks() {
-		try {
-			List<Book> books = (List<Book>) bookRepository.findAll();
-			if (books.isEmpty()) {
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			}
-			return new ResponseEntity<>(books, HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+	public Book searchById(long id) {
+		Optional<Book> book = bookRepository.findById(id);
+		if (book.isEmpty()) {
+			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);
 		}
+		return book.get();
 	}
 
-	public ResponseEntity<Book> getBookById(long id) {
-
-		Optional<Book> bookData = bookRepository.findById(id);
-
-		return bookData.map(book -> new ResponseEntity<>(book, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+	public List<Book> searchByTitleCategory(String title, String category) {
+		List<Book> books = bookRepository.findByTitleStartsWithAndCategory(title, BookCategory.getEnumCategory(category));
+		if (books.isEmpty()) {
+			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
+		}
+		return books;
 	}
 
-	public ResponseEntity<Book> getBookByHistory(BookHistory bookHistory) {
+	public List<Book> searchByTitle(String title) {
+		List<Book> books = bookRepository.findByTitleStartsWith(title);
+		if (books.isEmpty()) {
+			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
+		}
+		return books;
+	}
+
+	public List<Book> searchByCategory(String category) {
+		List<Book> books = bookRepository.findByCategory(BookCategory.getEnumCategory(category));
+		if (books.isEmpty()) {
+			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
+		}
+		return books;
+	}
+
+	public Book getBookByHistory(BookHistory bookHistory) {
 		Book book = bookRepository.findByHistory(bookHistory);
-		if (book != null) {
-			return new ResponseEntity<>(book, HttpStatus.OK);
+		if (book == null) {
+			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
+		}
+		return book;
+	}
+
+	public Book update(Book book) {
+		Optional<Book> _bookData = bookRepository.findById(book.getId_book());
+		if(_bookData.isPresent()){
+			Book bookData = _bookData.get();
+			book.setTitle(book.getTitle() != null ? book.getTitle() : bookData.getTitle());
+			book.setAuthor(book.getAuthor() != null ? book.getAuthor() : bookData.getAuthor());
+			book.setDescription(book.getDescription() != null ? book.getDescription() : bookData.getDescription());
+			book.setCategory(book.getCategory() != null ? book.getCategory() : bookData.getCategory());
+			book.setISBN(book.getISBN() != null ? book.getISBN() : bookData.getISBN());
+			book.setHistory(bookData.getHistory());
+			return bookRepository.save(book);
 		} else {
-			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
 		}
 	}
 
-	public ResponseEntity<List<Book>> getBookByTitle(String title) {
-		try {
-			List<Book> books = bookRepository.findByTitleStartsWith(title);
-			if (books.isEmpty()) {
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			}
-			return new ResponseEntity<>(books, HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+	public void delete(long bookId) {
+		bookRepository.deleteById(bookId);
 	}
 
-	public ResponseEntity<List<Book>> getBookByCategory(String category) {
-		try {
-			List<Book> books = bookRepository.findByCategory(BookCategory.getEnumCategory(category));
-			if (books.isEmpty()) {
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			}
-			return new ResponseEntity<>(books, HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+	public Book updateLastHired(long bookId) {
+		Optional<Book> bookData = bookRepository.findById(bookId);
+		if (bookData.isEmpty()) {
+			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
 		}
+		BookHistory history = bookData.get().getHistory();
+		historyService.updateHistory(history.getId_history());
+		bookData = bookRepository.findById(bookId);
+		if (bookData.isEmpty()) {
+			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
+		}
+		return bookData.get();
+
 	}
 
-	public ResponseEntity<List<Book>> getBookByTitleAndCategory(String title, String category) {
-		try {
-			List<Book> books = bookRepository.findByTitleStartsWithAndCategory(title, BookCategory.getEnumCategory(category));
-			if (books.isEmpty()) {
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			}
-			return new ResponseEntity<>(books, HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-
-	public ResponseEntity<Book> updateBook(long book_id, Book book) {
-
-		Optional<Book> bookData = bookRepository.findById(book_id);
-
-		if (bookData.isPresent()) {
-
-			Book _book = bookData.get();
-			_book.setDescription(book.getDescription());
-
-			return new ResponseEntity<>(bookRepository.save(_book), HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
-
-	public ResponseEntity<HttpStatus> deleteBook(long book_id) {
-		try {
-			bookRepository.deleteById(book_id);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
-		}
-	}
-
-	public ResponseEntity<HttpStatus> updateLastHired(long book_id) {
-		Optional<Book> bookData = bookRepository.findById(book_id);
-
-		if (bookData.isPresent()) {
-			BookHistory history = bookData.get().getHistory();
-			ResponseEntity<BookHistory> _history = historyService.updateHistory(history.getId_history());
-			return new ResponseEntity<>(_history.getStatusCode());
-		}
-		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
+	// for update from HistoryUser class
+	public void updateBookHireDate(BookHistory history){
+		Book book = getBookByHistory(history);
+		updateLastHired(book.getId_book());
 	}
 }

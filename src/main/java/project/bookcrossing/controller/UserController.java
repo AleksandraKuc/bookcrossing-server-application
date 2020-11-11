@@ -1,9 +1,13 @@
 package project.bookcrossing.controller;
 
+import io.swagger.annotations.*;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import project.bookcrossing.dto.user.UserDataDTO;
+import project.bookcrossing.dto.user.UserResponseDTO;
 import project.bookcrossing.entity.FavouritesKey;
 import project.bookcrossing.entity.User;
 import project.bookcrossing.service.ConversationService;
@@ -11,11 +15,12 @@ import project.bookcrossing.service.FavouriteBooksService;
 import project.bookcrossing.service.HistoryUsersService;
 import project.bookcrossing.service.UserService;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping(value = "/user")
+@RequestMapping(value = "/api/user")
 public class UserController {
 
 	@Autowired
@@ -26,45 +31,124 @@ public class UserController {
 	private ConversationService conversationService;
 	@Autowired
 	private HistoryUsersService historyUsersService;
+	@Autowired
+	private ModelMapper modelMapper;
 
-	@GetMapping(value = "/getById/{user_id}")
-	public ResponseEntity<User> getUserById(@PathVariable long user_id){
-		return userService.getUserById(user_id);
+
+	@PostMapping("/signin")
+	@ApiOperation(value = "${UserController.signin}")
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 422, message = "Invalid username/password supplied")})
+	public String login(@ApiParam("Username") @RequestParam String username, //
+						@ApiParam("Password") @RequestParam String password) {
+		return userService.signin(username, password);
 	}
 
-	@GetMapping(value = "/getByUsername/{username}")
-	public ResponseEntity<User> getUserByUsername(@PathVariable String username){
-		return userService.getUserByUsername(username);
+	@PostMapping("/signup")
+	@ApiOperation(value = "${UserController.signup}")
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 403, message = "Access denied"), //
+			@ApiResponse(code = 422, message = "Username is already in use")})
+	public String signup(@ApiParam("Signup User") @RequestBody UserDataDTO user) {
+		return userService.signup(modelMapper.map(user, User.class));
 	}
 
-	@GetMapping(value = "/getByNames/{firstName}/{lastName}")
-	public ResponseEntity<List<User>> getUserByName(@PathVariable String firstName, @PathVariable String lastName){
-		return userService.getUserByNames(firstName, lastName);
+	@DeleteMapping(value = "/{username}")
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
+	@ApiOperation(value = "${UserController.delete}", authorizations = { @Authorization(value="apiKey") })
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 403, message = "Access denied"), //
+			@ApiResponse(code = 404, message = "The user doesn't exist"), //
+			@ApiResponse(code = 500, message = "Expired or invalid JWT token")})
+	public String delete(@ApiParam("Username") @PathVariable String username) {
+		User user = userService.search(username);
+		//delete favourites books
+		FavouritesKey key = new FavouritesKey();
+		key.setId_user(user.getId());
+		favouriteBooksService.deleteFromList(key);
+		// delete conversations
+		conversationService.deleteByUser(user);
+		// delete user from books history
+		historyUsersService.deleteByUser(user.getId());
+		userService.delete(username);
+		return username;
+	}
+
+	@GetMapping(value = "/username/{username}")
+	@ApiOperation(value = "${UserController.search}", response = UserResponseDTO.class)
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 404, message = "The user doesn't exist")})
+	public UserResponseDTO search(@ApiParam("Username") @PathVariable String username) {
+		return modelMapper.map(userService.search(username), UserResponseDTO.class);
+	}
+
+	@GetMapping(value = "/names/{firstname}/{lastname}")
+	@ApiOperation(value = "${UserController.searchByNames}", response = UserResponseDTO.class)
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 404, message = "The user doesn't exist")})
+	public List<UserResponseDTO> searchByNames(@ApiParam("FirstName") @PathVariable String firstname,
+											   @ApiParam("LastName") @PathVariable String lastname) {
+		List<User> users = userService.searchByNames(firstname, lastname);
+		List<UserResponseDTO> response = new ArrayList<>();
+		for (User user : users) {
+			response.add(modelMapper.map(user, UserResponseDTO.class));
+		}
+		return response;
+	}
+
+	@GetMapping(value = "/id/{id}")
+	@ApiOperation(value = "${UserController.searchById}", response = UserResponseDTO.class)
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 404, message = "The user doesn't exist")})
+	public UserResponseDTO searchById(@ApiParam("Id") @PathVariable long id) {
+		return modelMapper.map(userService.searchById(id), UserResponseDTO.class);
 	}
 
 	@GetMapping(value = "/all")
-	public ResponseEntity<List<User>> getUsers(){
-		return userService.getAllUsers();
+	@ApiOperation(value = "${UserController.getAll}", response = UserResponseDTO.class)
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 404, message = "The user doesn't exist")})
+	public List<UserResponseDTO> getAll() {
+		List<User> users = userService.getAllUsers();
+		List<UserResponseDTO> response = new ArrayList<>();
+		for (User user : users) {
+			response.add(modelMapper.map(user, UserResponseDTO.class));
+		}
+		return response;
 	}
 
-	@PostMapping(value = "/create")
-	public ResponseEntity<User> postUser(@RequestBody User user){
-		return userService.postUser(user);
+	@PutMapping("/update")
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
+	@ApiOperation(value = "${UserController.update}")
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 403, message = "Access denied"), //
+			@ApiResponse(code = 422, message = "Username is already in use")})
+	public String update(@ApiParam("Update User") @RequestBody UserDataDTO user) {
+		return userService.update(modelMapper.map(user, User.class));
 	}
 
-	@DeleteMapping("/delete/{id_user}")
-	public ResponseEntity<HttpStatus> deleteUser(@PathVariable long id_user) {
-		FavouritesKey key = new FavouritesKey();
-		key.setId_user(id_user);
-		ResponseEntity<HttpStatus> _fav = favouriteBooksService.deleteFromList(key);
-		User user = getUserById(id_user).getBody();
-		ResponseEntity<HttpStatus> _conv = conversationService.deleteConversationByUser(user);
-		ResponseEntity<HttpStatus> _his = historyUsersService.deleteByUser(id_user);
-		return userService.deleteUser(id_user);
+	@GetMapping(value = "/me")
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
+	@ApiOperation(value = "${UserController.me}", response = UserResponseDTO.class, authorizations = { @Authorization(value="apiKey") })
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 403, message = "Access denied"), //
+			@ApiResponse(code = 500, message = "Expired or invalid JWT token")})
+	public UserResponseDTO whoami(HttpServletRequest req) {
+		return modelMapper.map(userService.whoami(req), UserResponseDTO.class);
 	}
 
-	@PutMapping("/update/{idUser}")
-	public ResponseEntity<User> updateUser(@PathVariable long idUser, @RequestBody User user) {
-		return userService.updateUser(idUser, user);
+	@GetMapping("/refresh")
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
+	public String refresh(HttpServletRequest req) {
+		return userService.refresh(req.getRemoteUser());
 	}
 }

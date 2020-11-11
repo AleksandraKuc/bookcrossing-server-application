@@ -82,6 +82,26 @@ public class Book implements Serializable{
 		this.history = history;
 	}
 
+	public void setId_book(long id_book) {
+		this.id_book = id_book;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public void setAuthor(String author) {
+		this.author = author;
+	}
+
+	public void setISBN(String ISBN) {
+		this.ISBN = ISBN;
+	}
+
+	public void setCategory(BookCategory category) {
+		this.category = category;
+	}
+
 	@Override
 	public String toString() {
 		return "Book{" +

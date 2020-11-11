@@ -1,7 +1,6 @@
 package project.bookcrossing.entity;
 
 import javax.persistence.*;
-import java.util.Date;
 
 @Entity
 public class HistoryUsers {

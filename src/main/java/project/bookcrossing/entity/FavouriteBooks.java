@@ -17,4 +17,11 @@ public class FavouriteBooks {
 	public void setId_favouriteBooks(FavouritesKey id_favBook) {
 		this.id_favBook = id_favBook;
 	}
+
+	@Override
+	public String toString() {
+		return "FavouriteBooks{" +
+				"id_favBook=" + id_favBook +
+				'}';
+	}
 }

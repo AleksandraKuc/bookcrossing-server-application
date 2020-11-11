@@ -2,6 +2,7 @@ package project.bookcrossing.entity;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.util.List;
 
 @Entity
 @SequenceGenerator(name = "user_seq", allocationSize = 100)
@@ -27,13 +28,15 @@ public class User {
 	private String province;
 	private long phoneNumber;
 	private Date startDate;
-	private boolean usertype;
 	private int addedBooks;
+
+	@ElementCollection(fetch = FetchType.EAGER)
+	List<Role> roles;
 
 	public User(){
 	}
 
-	public User(String username, String password, String firstName, String lastName, String email, String city, String province, long phoneNumber, Date startDate, boolean usertype, int addedBooks) {
+	public User(String username, String password, String firstName, String lastName, String email, String city, String province, long phoneNumber, Date startDate, int addedBooks) {
 		this.username = username;
 		this.password = password;
 		this.firstName = firstName;
@@ -43,7 +46,6 @@ public class User {
 		this.province = province;
 		this.phoneNumber = phoneNumber;
 		this.startDate = startDate;
-		this.usertype = usertype;
 		this.addedBooks = addedBooks;
 	}
 
@@ -56,6 +58,12 @@ public class User {
 		this.city = city;
 		this.province = province;
 		this.phoneNumber = phoneNumber;
+	}
+
+	public long getId() { return id_user; }
+
+	public void setId(long id) {
+		this.id_user = id;
 	}
 
 	public String getUsername() {
@@ -130,17 +138,13 @@ public class User {
 		this.addedBooks = addedBooks;
 	}
 
-	public long getId() {
-		return id_user;
-	}
+	public Date getStartDate() { return startDate; }
 
-	public Date getStartDate() {
-		return startDate;
-	}
+	public void setStartDate(Date startDate) { this.startDate = startDate; }
 
-	public boolean getUsertype() {
-		return usertype;
-	}
+	public List<Role> getRoles() { return roles; }
+
+	public void setRoles(List<Role> roles) { this.roles = roles; }
 
 	@Override
 	public String toString() {
@@ -155,7 +159,6 @@ public class User {
 				", province='" + province + '\'' +
 				", phoneNumber=" + phoneNumber +
 				", startDate=" + startDate +
-				", usertype=" + usertype +
 				", addedBooks=" + addedBooks +
 				'}';
 	}

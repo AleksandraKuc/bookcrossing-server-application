@@ -1,19 +1,23 @@
 package project.bookcrossing.controller;
 
+import io.swagger.annotations.*;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import project.bookcrossing.dto.book.BookDataDTO;
+import project.bookcrossing.dto.book.BookResponseDTO;
 import project.bookcrossing.entity.*;
+import project.bookcrossing.exception.CustomException;
 import project.bookcrossing.service.*;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
-@RequestMapping(value = "/book")
+@RequestMapping(value = "/api/book")
 public class BookController {
 
 	@Autowired
@@ -24,96 +28,155 @@ public class BookController {
 	private BookHistoryService bookHistoryService;
 	@Autowired
 	private FavouriteBooksService favouriteBooksService;
+	@Autowired
+	private ModelMapper modelMapper;
 
 	@GetMapping(value = "/all")
-	public ResponseEntity<List<Book>> getAllBooks() {
-		return bookService.getBooks();
-	}
-
-	@GetMapping(value = "/getBook/{book_id}")
-	public ResponseEntity<Book> getBookDetails(@PathVariable long book_id) {
-		return bookService.getBookById(book_id);
-	}
-
-	@GetMapping(value = "/getByTitleCategory/{title}/{category}")
-	public ResponseEntity<List<Book>> getBookByTitleAndCategory(@PathVariable String title, @PathVariable String category) {
-		return bookService.getBookByTitleAndCategory(title, category);
-	}
-
-	@GetMapping(value = "/getByTitle/{title}")
-	public ResponseEntity<List<Book>> getBookByTitle(@PathVariable String title) {
-		return bookService.getBookByTitle(title);
-	}
-
-	@GetMapping(value = "/getByCategory/{category}")
-	public ResponseEntity<List<Book>> getBookByCategory(@PathVariable String category) {
-		return bookService.getBookByCategory(category);
-	}
-
-	@GetMapping(value = "/getBooksByUser/{user_id}")
-	public ResponseEntity<List<Book>> getBooksByUser(@PathVariable long user_id) {
-		List<Book> books = new ArrayList<>();
-		List<HistoryUsers> historyUsers = historyUsersService.getByCurrentUserKey(user_id).getBody();
-		if (historyUsers != null && !historyUsers.isEmpty()) {
-			for (HistoryUsers item : historyUsers){
-				BookHistory bookHistory = bookHistoryService.getHistoryById(item.getId_historyUsers().getId_history()).getBody();
-				if (bookHistory != null) {
-					Book book = bookService.getBookByHistory(bookHistory).getBody();
-					if (book != null) {
-						books.add(book);
-					}
-				}
-			}
+	@ApiOperation(value = "${BookController.getAll}", response = BookResponseDTO.class)
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 404, message = "The book doesn't exist")})
+	public List<BookResponseDTO> getAll() {
+		List<Book> books = bookService.getAllBooks();
+		List<BookResponseDTO> response = new ArrayList<>();
+		for (Book book : books) {
+			response.add(modelMapper.map(book, BookResponseDTO.class));
 		}
-		if (!books.isEmpty()) {
-			return new ResponseEntity<>(books, HttpStatus.OK);
+		return response;
+	}
+
+	@GetMapping(value = "/id/{id}")
+	@ApiOperation(value = "${BookController.searchById}", response = BookResponseDTO.class)
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 404, message = "The user doesn't exist")})
+	public BookResponseDTO searchById(@ApiParam("Id") @PathVariable long id) {
+		return modelMapper.map(bookService.searchById(id), BookResponseDTO.class);
+	}
+
+	@GetMapping(value = "/title&category/{title}/{category}")
+	@ApiOperation(value = "${BookController.searchByTitleCategory}", response = BookResponseDTO.class)
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 404, message = "The user doesn't exist")})
+	public List<BookResponseDTO> searchByTitleCategory(@ApiParam("Title") @PathVariable String title,
+											   @ApiParam("Category") @PathVariable String category) {
+		List<Book> books = bookService.searchByTitleCategory(title, category);
+		List<BookResponseDTO> response = new ArrayList<>();
+		for (Book book : books) {
+			response.add(modelMapper.map(book, BookResponseDTO.class));
+		}
+		return response;
+	}
+
+	@GetMapping(value = "/title/{title}")
+	@ApiOperation(value = "${BookController.searchByTitle}", response = BookResponseDTO.class)
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 404, message = "The user doesn't exist")})
+	public List<BookResponseDTO> searchByTitle(@ApiParam("Title") @PathVariable String title) {
+		List<Book> books = bookService.searchByTitle(title);
+		List<BookResponseDTO> response = new ArrayList<>();
+		for (Book book : books) {
+			response.add(modelMapper.map(book, BookResponseDTO.class));
+		}
+		return response;
+	}
+
+	@GetMapping(value = "/category/{category}")
+	@ApiOperation(value = "${BookController.searchByCategory}", response = BookResponseDTO.class)
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 404, message = "The user doesn't exist")})
+	public List<BookResponseDTO> searchByCategory(@ApiParam("Category") @PathVariable String category) {
+		List<Book> books = bookService.searchByCategory(category);
+		List<BookResponseDTO> response = new ArrayList<>();
+		for (Book book : books) {
+			response.add(modelMapper.map(book, BookResponseDTO.class));
+		}
+		return response;
+	}
+
+
+	@GetMapping(value = "/user/{userId}")
+	@ApiOperation(value = "${BookController.getByUser}", response = BookResponseDTO.class)
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 404, message = "The user doesn't exist")})
+	public List<BookResponseDTO> getByUser(@ApiParam("User") @PathVariable long userId) {
+		List<BookResponseDTO> books = new ArrayList<>();
+		List<HistoryUsers> historyUsers = historyUsersService.searchByCurrentUserKey(userId);
+		for (HistoryUsers item : historyUsers){
+			BookHistory bookHistory = bookHistoryService.searchById(item.getId_historyUsers().getId_history());
+			Book book = bookService.getBookByHistory(bookHistory);
+			books.add(modelMapper.map(book, BookResponseDTO.class));
+		}
+		if (books.isEmpty()){
+			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
 		} else {
-			return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+			return books;
 		}
 	}
 
-	@PostMapping(value = "/create/{user_id}")
-	public ResponseEntity<Book> postBook(@PathVariable long user_id, @RequestBody Book book) {
-
-		BookHistory bookHistory = new BookHistory(new Date(), new Date());
-		book.setHistory(bookHistory);
-
-		ResponseEntity<Book> _book = bookService.createBook(book);
-
-		if (_book.getStatusCode().equals(HttpStatus.CREATED)) {
-			ResponseEntity<Book> sentBook = bookService.getBookById(Objects.requireNonNull(_book.getBody()).getId_book());
-			if (sentBook.getStatusCode().equals(HttpStatus.OK)) {
-				long historyId = Objects.requireNonNull(sentBook.getBody()).getHistory().getId_history();
-				ResponseEntity<HistoryUsers> _historyUser = historyUsersService.createHistoryUsers(historyId, user_id, "firstUser");
-				if (_historyUser.getStatusCode().equals(HttpStatus.CREATED)) {
-					return _book;
-				}
-			}
-		}
-		return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
+	@PostMapping("/create/{userId}")
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
+	@ApiOperation(value = "${BookController.create}")
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 403, message = "Access denied"), //
+			@ApiResponse(code = 422, message = "Username is already in use")})
+	public BookResponseDTO create(@ApiParam("Book") @RequestBody BookDataDTO book,
+								  @ApiParam("User") @PathVariable long userId) {
+		Book savedBook = bookService.create(modelMapper.map(book, Book.class));
+		long historyId = savedBook.getHistory().getId_history();
+		historyUsersService.createHistoryUsers(userId, historyId, "firstUser");
+		return modelMapper.map(savedBook, BookResponseDTO.class);
 	}
 
-	@PutMapping(value = "/update/{book_id}")
-	public ResponseEntity<Book> updateBook(@PathVariable long book_id, @RequestBody Book book) {
-		return bookService.updateBook(book_id, book);
+	@PutMapping("/update")
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
+	@ApiOperation(value = "${BookController.update}")
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 403, message = "Access denied")})
+	public BookResponseDTO update(@ApiParam("Update Book") @RequestBody BookDataDTO book) {
+		return modelMapper.map(bookService.update(modelMapper.map(book, Book.class)), BookResponseDTO.class);
 	}
 
-	@PutMapping(value = "/update/hired/{book_id}")
-	public ResponseEntity<HttpStatus> updateLastHired(@PathVariable long book_id) {
-		return bookService.updateLastHired(book_id);
+	@PutMapping("/updateHired/{bookId}")
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
+	@ApiOperation(value = "${BookController.updateLastHired}")
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 403, message = "Access denied")})
+	public BookResponseDTO updateLastHired(@ApiParam("Update Book") @PathVariable long bookId) {
+		return modelMapper.map(bookService.updateLastHired(bookId), BookResponseDTO.class);
 	}
 
-	@DeleteMapping(value = "/delete/{book_id}")
-	public ResponseEntity<HttpStatus> deleteBook(@PathVariable long book_id) {
-		Book book = bookService.getBookById(book_id).getBody();
-		if (book != null) {
-			long historyId = book.getHistory().getId_history();
-			FavouritesKey key = new FavouritesKey(book_id);
-			bookHistoryService.deleteHistory(historyId);
-			historyUsersService.deleteByHistory(historyId);
-			favouriteBooksService.deleteByKey(key);
-			return bookService.deleteBook(book_id);
-		}
-		return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
+	@DeleteMapping(value = "/{bookId}")
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
+	@ApiOperation(value = "${BookController.delete}", authorizations = { @Authorization(value="apiKey") })
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 403, message = "Access denied"), //
+			@ApiResponse(code = 404, message = "The book doesn't exist"), //
+			@ApiResponse(code = 500, message = "Expired or invalid JWT token")})
+	public long delete(@ApiParam("BookId") @PathVariable long bookId) {
+		Book book = bookService.searchById(bookId);
+		long historyId = book.getHistory().getId_history();
+
+		//delete records from history_users
+		historyUsersService.deleteByHistory(historyId);
+
+		//delete records from book_history
+		bookHistoryService.deleteHistory(historyId);
+
+		FavouritesKey key = new FavouritesKey(bookId);
+		//delete records from favourites_books
+		favouriteBooksService.deleteFromList(key);
+
+		//delete book
+		bookService.delete(bookId);
+		return bookId;
 	}
 }
