@@ -2,12 +2,12 @@ package project.bookcrossing.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 import project.bookcrossing.entity.BookHistory;
+import project.bookcrossing.exception.CustomException;
 import project.bookcrossing.repository.BookHistoryRepository;
 
-import java.util.Date;
 import java.util.Optional;
 
 
@@ -16,41 +16,40 @@ public class BookHistoryService {
 
 	@Autowired
 	private BookHistoryRepository historyRepository;
+	@Autowired
+	private BookService bookService;
 
-	public ResponseEntity<BookHistory> createHistory() {
-		try {
-			BookHistory _bookHistory = historyRepository.save(new BookHistory());
-			return new ResponseEntity<>(_bookHistory, HttpStatus.CREATED);
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
-		}
+	public BookHistory createHistory() {
+		return historyRepository.save(new BookHistory());
 	}
 
-	public ResponseEntity<BookHistory> getHistoryById(long id) {
+	public BookHistory searchById(long id) {
 		Optional<BookHistory> history = historyRepository.findById(id);
-		return history.map(_history -> new ResponseEntity<>(_history, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+		if (history.isEmpty()) {
+			throw new CustomException("The history doesn't exist", HttpStatus.NOT_FOUND);
+		}
+		return history.get();
 	}
 
-	public ResponseEntity<BookHistory> updateHistory(long history_id) {
+	public BookHistory updateHistory(long historyId) {
 
-		Optional<BookHistory> historyData = historyRepository.findById(history_id);
+		Optional<BookHistory> historyData = historyRepository.findById(historyId);
 
-		if (historyData.isPresent()) {
-
-			BookHistory _history = historyData.get();
-			_history.setLast_hire();
-			return new ResponseEntity<>(historyRepository.save(_history), HttpStatus.OK);
+		if (historyData.isEmpty()) {
+			throw new CustomException("The history doesn't exist", HttpStatus.NOT_FOUND);
 		} else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			BookHistory history = historyData.get();
+			history.setLast_hire();
+			return historyRepository.save(history);
 		}
 	}
 
-	public ResponseEntity<HttpStatus> deleteHistory(long history_id) {
-		try {
-			historyRepository.deleteById(history_id);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
-		}
+	public void deleteHistory(long historyId) {
+		historyRepository.deleteById(historyId);
+	}
+
+	public void updateBookHireDate(long historyId){
+		BookHistory bookHistory = searchById(historyId);
+		bookService.updateBookHireDate(bookHistory);
 	}
 }

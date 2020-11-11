@@ -2,12 +2,13 @@ package project.bookcrossing.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import project.bookcrossing.entity.Conversation;
 import project.bookcrossing.entity.User;
+import project.bookcrossing.exception.CustomException;
 import project.bookcrossing.repository.ConversationRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,55 +20,53 @@ public class ConversationService {
 	@Autowired
 	private MessageService messageService;
 
-	public ResponseEntity<Conversation> createConversation(User firstUser, User secondUser) {
-		try {
-			return new ResponseEntity<>(conversationRepository.save(new Conversation(firstUser, secondUser)), HttpStatus.CREATED);
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.EXPECTATION_FAILED);
+	public Conversation createConversation(User firstUser, User secondUser) {
+		if (!checkIfExists(firstUser, secondUser)) {
+			return conversationRepository.save(new Conversation(firstUser, secondUser));
+		} else {
+			throw new CustomException("Conversation is already created", HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 	}
 
-	public ResponseEntity<List<Conversation>> getConversationsByUser(User user) {
-		try {
-			List<Conversation> conversations = conversationRepository.getAllByConversationUsers(user);
-			if (conversations.isEmpty()) {
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			}
-			return new ResponseEntity<>(conversations, HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+	public List<Conversation> searchByUser(User user) {
+		List<Conversation> conversations = conversationRepository.getAllByConversationUsers(user);
+		if (conversations.isEmpty()) {
+			throw new CustomException("The conversation doesn't exist", HttpStatus.NOT_FOUND);
 		}
+		return conversations;
 
 	}
 
-	public ResponseEntity<Conversation> getConversationById(long id) {
-		Optional<Conversation> conversationData = conversationRepository.findById(id);
-		return conversationData.map(conversation -> new ResponseEntity<>(conversation, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-	}
-
-	public ResponseEntity<HttpStatus> deleteConversation(long id_conversation) {
-		try {
-			Conversation conversation = getConversationById(id_conversation).getBody();
-			ResponseEntity<HttpStatus> _mes = messageService.deleteByConversation(conversation);
-			if (_mes.getStatusCode().equals(HttpStatus.NO_CONTENT)) {
-				conversationRepository.deleteById(id_conversation);
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			} else {
-				return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
-			}
-		} catch (Exception e) {
-			return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
+	public Conversation searchById(long conversationId) {
+		Optional<Conversation> conversation = conversationRepository.findById(conversationId);
+		if (conversation.isEmpty()) {
+			throw new CustomException("The conversation doesn't exist", HttpStatus.NOT_FOUND);
 		}
+		return conversation.get();
 	}
 
-	public ResponseEntity<HttpStatus> deleteConversationByUser(User user) {
+	public void deleteConversation(Conversation conversation) {
+		messageService.deleteByConversation(conversation);
+		conversationRepository.deleteById(conversation.getId_conversation());
+	}
+
+	public void deleteByUser(User user) {
 		List<Conversation> conversations = conversationRepository.getAllByConversationUsers(user);
 		if (conversations != null && !conversations.isEmpty()) {
 			for (Conversation item : conversations) {
-				deleteConversation(item.getId_conversation());
+				deleteConversation(item);
 			}
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
+	}
+
+	private boolean checkIfExists(User first, User second) {
+		List<Conversation> conversations = searchByUser(first);
+		for (Conversation conv : conversations) {
+			if ((conv.getFirstUser().getId() == first.getId() && conv.getSecondUser().getId() == second.getId()) ||
+					(conv.getFirstUser().getId() == second.getId() && conv.getSecondUser().getId() == first.getId())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
