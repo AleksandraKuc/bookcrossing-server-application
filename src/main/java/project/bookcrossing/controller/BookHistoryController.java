@@ -19,6 +19,7 @@ public class BookHistoryController {
 	private ModelMapper modelMapper;
 
 	@PostMapping("/create")
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
 	@ApiOperation(value = "${BookHistoryController.createHistory}")
 	@ApiResponses(value = {//
 			@ApiResponse(code = 400, message = "Something went wrong"), //

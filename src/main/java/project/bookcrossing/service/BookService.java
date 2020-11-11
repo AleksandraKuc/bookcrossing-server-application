@@ -105,4 +105,10 @@ public class BookService {
 		return bookData.get();
 
 	}
+
+	// for update from HistoryUser class
+	public void updateBookHireDate(BookHistory history){
+		Book book = getBookByHistory(history);
+		updateLastHired(book.getId_book());
+	}
 }

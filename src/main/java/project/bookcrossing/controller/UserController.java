@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import project.bookcrossing.dto.user.UserDataDTO;
 import project.bookcrossing.dto.user.UserResponseDTO;
+import project.bookcrossing.entity.FavouritesKey;
 import project.bookcrossing.entity.User;
 import project.bookcrossing.service.ConversationService;
 import project.bookcrossing.service.FavouriteBooksService;
@@ -64,13 +65,15 @@ public class UserController {
 			@ApiResponse(code = 404, message = "The user doesn't exist"), //
 			@ApiResponse(code = 500, message = "Expired or invalid JWT token")})
 	public String delete(@ApiParam("Username") @PathVariable String username) {
-//		FavouritesKey key = new FavouritesKey();
-//		key.setId_user(id_user);
-//		ResponseEntity<HttpStatus> _fav = favouriteBooksService.deleteFromList(key);
-//		User user = getUserById(id_user).getBody();
-//		ResponseEntity<HttpStatus> _conv = conversationService.deleteConversationByUser(user);
-//		ResponseEntity<HttpStatus> _his = historyUsersService.deleteByUser(id_user);
-//		return userService.deleteUser(id_user);
+		User user = userService.search(username);
+		//delete favourites books
+		FavouritesKey key = new FavouritesKey();
+		key.setId_user(user.getId());
+		favouriteBooksService.deleteFromList(key);
+		// delete conversations
+		conversationService.deleteByUser(user);
+		// delete user from books history
+		historyUsersService.deleteByUser(user.getId());
 		userService.delete(username);
 		return username;
 	}

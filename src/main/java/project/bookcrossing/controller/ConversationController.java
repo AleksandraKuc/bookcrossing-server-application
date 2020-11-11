@@ -1,14 +1,21 @@
 package project.bookcrossing.controller;
 
+import io.swagger.annotations.*;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import project.bookcrossing.dto.conversation.ConversationResponseDTO;
+import project.bookcrossing.dto.user.UserDataDTO;
+import project.bookcrossing.dto.user.UserResponseDTO;
 import project.bookcrossing.entity.Conversation;
 import project.bookcrossing.entity.User;
 import project.bookcrossing.service.ConversationService;
 import project.bookcrossing.service.UserService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -19,28 +26,64 @@ public class ConversationController {
 	private ConversationService conversationService;
 	@Autowired
 	private UserService userService;
+	@Autowired
+	private ModelMapper modelMapper;
 
-	@PostMapping(value = "/create/{user_id}/{recipient_id}")
-	public ResponseEntity<Conversation> postConversation(@PathVariable long user_id, @PathVariable long recipient_id) {
-		User firstUser = userService.getUserById(user_id).getBody();
-		User secondUser = userService.getUserById(recipient_id).getBody();
-		return conversationService.createConversation(firstUser, secondUser);
+	@PostMapping("/create/{userId}/{recipientId}")
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
+	@ApiOperation(value = "${ConversationController.create}")
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 403, message = "Access denied"), //
+			@ApiResponse(code = 422, message = "Username is already in use")})
+	public ConversationResponseDTO create(@ApiParam("FirstUser") @PathVariable long userId,
+										  @ApiParam("RecipientUser") @PathVariable long recipientId) {
+		User firstUser = userService.searchById(userId);
+		User secondUser = userService.searchById(recipientId);
+		return modelMapper.map(conversationService.createConversation(firstUser, secondUser), ConversationResponseDTO.class);
 	}
 
-	@GetMapping(value = "/getByUser/{user_id}")
-	public ResponseEntity<List<Conversation>> getByUser(@PathVariable long user_id){
-		User user = userService.getUserById(user_id).getBody();
-		return conversationService.getConversationsByUser(user);
+	@GetMapping(value = "/getByUser/{userId}")
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
+	@ApiOperation(value = "${ConversationController.searchByUser}", response = ConversationResponseDTO.class)
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 403, message = "Access denied"), //
+			@ApiResponse(code = 404, message = "The conversation doesn't exist")})
+	public List<ConversationResponseDTO> searchByUser(@ApiParam("UserId") @PathVariable long userId) {
+		User user = userService.searchById(userId);
+		List<Conversation> conversations = conversationService.searchByUser(user);
+		List<ConversationResponseDTO> response = new ArrayList<>();
+		for (Conversation conversation : conversations) {
+			response.add(modelMapper.map(conversation, ConversationResponseDTO.class));
+		}
+		return response;
 	}
 
-	@DeleteMapping("/delete/{conversation_id}")
-	public ResponseEntity<HttpStatus> deleteConversation(@PathVariable long conversation_id) {
-		return conversationService.deleteConversation(conversation_id);
+	@DeleteMapping(value = "/delete/{conversationId}")
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
+	@ApiOperation(value = "${ConversationController.delete}", authorizations = { @Authorization(value="apiKey") })
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 403, message = "Access denied"), //
+			@ApiResponse(code = 404, message = "The conversation doesn't exist"), //
+			@ApiResponse(code = 500, message = "Expired or invalid JWT token")})
+	public void delete(@ApiParam("ConversationId") @PathVariable long conversationId) {
+		Conversation conversation = conversationService.searchById(conversationId);
+		conversationService.deleteConversation(conversation);
 	}
 
-	@DeleteMapping("/deleteByUser/{user_id}")
-	public ResponseEntity<HttpStatus> deleteConversationsByUser(@PathVariable long user_id) {
-		User user = userService.getUserById(user_id).getBody();
-		return conversationService.deleteConversationByUser(user);
+	@DeleteMapping(value = "/deleteByUser/{userId}")
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
+	@ApiOperation(value = "${ConversationController.deleteByUser}", authorizations = { @Authorization(value="apiKey") })
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 403, message = "Access denied"), //
+			@ApiResponse(code = 404, message = "The conversation doesn't exist"), //
+			@ApiResponse(code = 500, message = "Expired or invalid JWT token")})
+	public void deleteByUser(@ApiParam("UserId") @PathVariable long userId) {
+		User user = userService.searchById(userId);
+		conversationService.deleteByUser(user);
 	}
+
 }

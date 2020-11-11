@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import project.bookcrossing.entity.Book;
 import project.bookcrossing.entity.BookHistory;
 import project.bookcrossing.entity.User;
 import project.bookcrossing.exception.CustomException;
@@ -17,6 +18,8 @@ public class BookHistoryService {
 
 	@Autowired
 	private BookHistoryRepository historyRepository;
+	@Autowired
+	private BookService bookService;
 
 	public BookHistory createHistory() {
 		return historyRepository.save(new BookHistory());
@@ -45,5 +48,10 @@ public class BookHistoryService {
 
 	public void deleteHistory(long historyId) {
 		historyRepository.deleteById(historyId);
+	}
+
+	public void updateBookHireDate(long historyId){
+		BookHistory bookHistory = searchById(historyId);
+		bookService.updateBookHireDate(bookHistory);
 	}
 }

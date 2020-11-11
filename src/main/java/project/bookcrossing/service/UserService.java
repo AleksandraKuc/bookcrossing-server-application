@@ -129,9 +129,4 @@ public class UserService {
 		return users;
 	}
 
-//	public ResponseEntity<User> getUserById(long id) {
-//		Optional<User> userData = userRepository.findById(id);
-//		return userData.map(user -> new ResponseEntity<>(user, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-//	}
-
 }

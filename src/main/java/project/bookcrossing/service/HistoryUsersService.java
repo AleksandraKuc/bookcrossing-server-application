@@ -38,12 +38,59 @@ public class HistoryUsersService {
 		return getByKey(historyUser);
 	}
 
-	public List<HistoryUsers> getByCurrentUserKey(long user_id) {
+	public List<HistoryUsers> searchByCurrentUserKey(long user_id) {
 		return getByUserKey(user_id, "currentUser");
 	}
 
-	public List<HistoryUsers> getByFirstUserKey(long user_id) {
+	public List<HistoryUsers> searchByFirstUserKey(long user_id) {
 		return getByUserKey(user_id, "firstUser");
+	}
+
+	public HistoryUsers updateHistoryUsers(long historyId, long userId) {
+		HistoryUsers _historyUser = new HistoryUsers();
+		//searching by historyId for update user Id
+		HistoryUsersKey key = new HistoryUsersKey(historyId);
+		_historyUser.setId_historyUsers(key);
+
+		List<HistoryUsers> history = getByKey(_historyUser);
+		if (history.size() > 1){
+			HistoryUsers historyData;
+			if (history.get(0).getUserType().equals("currentUser")) {
+				historyData = history.get(0);
+			} else {
+				historyData = history.get(1);
+			}
+			historyUsersRepository.deleteById(historyData.getId_historyUsers());
+		}
+		return createHistoryUsers(historyId, userId, "currentUser");
+	}
+
+	private void updateBook(long historyId) {
+
+	}
+
+	public void deleteByUser(long user_id) {
+		HistoryUsers historyUser = new HistoryUsers();
+		HistoryUsersKey key = new HistoryUsersKey();
+		key.setId_user(user_id);
+		historyUser.setId_historyUsers(key);
+		this.deleteList(historyUser);
+	}
+
+	public void deleteByHistory(long history_id) {
+		HistoryUsers historyUser = new HistoryUsers();
+		HistoryUsersKey key = new HistoryUsersKey(history_id);
+		historyUser.setId_historyUsers(key);
+		this.deleteList(historyUser);
+	}
+
+	// helper methods
+
+	private void deleteList(HistoryUsers historyUser){
+		List<HistoryUsers> _users = getByKey(historyUser);
+		for (HistoryUsers us : _users) {
+			historyUsersRepository.deleteById(us.getId_historyUsers());
+		}
 	}
 
 	private List<HistoryUsers> getByUserKey(long user_id, String type) {
@@ -52,86 +99,38 @@ public class HistoryUsersService {
 
 		_historyUser.setId_historyUsers(key);
 		key.setId_user(user_id);
-		List<HistoryUsers> usersList = getByKey(_historyUser).getBody();
+
+		List<HistoryUsers> usersList = getByKey(_historyUser);
+
 		List<HistoryUsers> currentUsersList = new ArrayList<>();
 		List<HistoryUsers> firstUsersList = new ArrayList<>();
-		if (usersList != null) {
-			for (HistoryUsers item : usersList) {
-				List<HistoryUsers> history = getByHistoryKey(item.getId_historyUsers().getId_history()).getBody();
+		for (HistoryUsers item : usersList) {
+			List<HistoryUsers> history = searchByHistoryKey(item.getId_historyUsers().getId_history());
 
-				if (history != null && !history.isEmpty()) {
-					if (history.size() == 1) {
-						currentUsersList.add(item);
-						firstUsersList.add(item);
-					} else {
-						if (history.get(0).getId_historyUsers().getId_user().equals(user_id)) {
-							firstUsersList.add(item);
-						} else {
-							currentUsersList.add(item);
-						}
-					}
-				}
-			}
-			if (type.equals("currentUser")){
-				return currentUsersList;
+			if (history.size() == 1) {
+				currentUsersList.add(item);
+				firstUsersList.add(item);
 			} else {
-				return firstUsersList;
-			}
-		}
-		throw new CustomException("The historyUser doesn't exist", HttpStatus.NOT_FOUND);
-	}
-
-	public ResponseEntity<HistoryUsers> updateHistoryUsers(long user_id, long history_id) {
-		HistoryUsers _historyUser = new HistoryUsers();
-		HistoryUsersKey key = new HistoryUsersKey(history_id);
-		_historyUser.setId_historyUsers(key);
-		key.setId_history(history_id);
-		List<HistoryUsers> history = getByKey(_historyUser).getBody();
-		if (history != null && !history.isEmpty()) {
-			try {
-				if (history.size() > 1){
-					HistoryUsers historyData;
-					if (history.get(0).getUserType().equals("currentUser")) {
-						historyData = history.get(0);
-					} else {
-						historyData = history.get(1);
-					}
-					historyUsersRepository.deleteById(historyData.getId_historyUsers());
+				if (history.get(0).getId_historyUsers().getId_user().equals(user_id)) {
+					firstUsersList.add(item);
+				} else {
+					currentUsersList.add(item);
 				}
-				return createHistoryUsers(history_id, user_id, "currentUser");
-			} catch (Exception e) {
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 		}
-		return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-	}
-
-	public ResponseEntity<HttpStatus> deleteByUser(long user_id) {
-		HistoryUsers historyUser = new HistoryUsers();
-		HistoryUsersKey key = new HistoryUsersKey();
-		key.setId_user(user_id);
-		historyUser.setId_historyUsers(key);
-		return this.deleteList(historyUser);
-	}
-
-	public ResponseEntity<HttpStatus> deleteByHistory(long history_id) {
-		HistoryUsers historyUser = new HistoryUsers();
-		HistoryUsersKey key = new HistoryUsersKey(history_id);
-		historyUser.setId_historyUsers(key);
-		return this.deleteList(historyUser);
-	}
-
-	private ResponseEntity<HttpStatus> deleteList(HistoryUsers historyUser){
-		List<HistoryUsers> _users = getByKey(historyUser).getBody();
-		if (_users != null && !_users.isEmpty()) {
-			for (HistoryUsers us : _users) {
-				historyUsersRepository.deleteById(us.getId_historyUsers());
+		if (type.equals("currentUser")){
+			if (currentUsersList.isEmpty()){
+				throw new CustomException("Current historyUser doesn't exist", HttpStatus.NOT_FOUND);
 			}
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			return currentUsersList;
+		} else {
+			if (firstUsersList.isEmpty()) {
+				throw new CustomException("First historyUser doesn't exist", HttpStatus.NOT_FOUND);
+			}
+			return firstUsersList;
 		}
-		return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
-	}
 
+	}
 
 	private List<HistoryUsers> getByKey(HistoryUsers historyUser) {
 		Example<HistoryUsers> historyExample = Example.of(historyUser);

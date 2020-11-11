@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface ConversationRepository extends CrudRepository<Conversation, Long> {
 	List<Conversation> getAllByConversationUsers(User user);
+//	boolean existsByFirstUserAndSecondUser(User firstUser, User secondUser);
 }

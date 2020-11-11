@@ -104,7 +104,7 @@ public class BookController {
 			@ApiResponse(code = 404, message = "The user doesn't exist")})
 	public List<BookResponseDTO> getByUser(@ApiParam("User") @PathVariable long userId) {
 		List<BookResponseDTO> books = new ArrayList<>();
-		List<HistoryUsers> historyUsers = historyUsersService.getByCurrentUserKey(userId);
+		List<HistoryUsers> historyUsers = historyUsersService.searchByCurrentUserKey(userId);
 		for (HistoryUsers item : historyUsers){
 			BookHistory bookHistory = bookHistoryService.searchById(item.getId_historyUsers().getId_history());
 			Book book = bookService.getBookByHistory(bookHistory);
@@ -143,6 +143,7 @@ public class BookController {
 	}
 
 	@PutMapping("/updateHired/{bookId}")
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
 	@ApiOperation(value = "${BookController.updateLastHired}")
 	@ApiResponses(value = {//
 			@ApiResponse(code = 400, message = "Something went wrong"), //
