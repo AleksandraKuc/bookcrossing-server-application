@@ -62,7 +62,7 @@ public class HistoryUsersService {
 			}
 			historyUsersRepository.deleteById(historyData.getId_historyUsers());
 		}
-		return createHistoryUsers(historyId, userId, "currentUser");
+		return createHistoryUsers(userId, historyId, "currentUser");
 	}
 
 	public void deleteByUser(long user_id) {

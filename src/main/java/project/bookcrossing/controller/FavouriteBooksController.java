@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/favouriteBooks")
+@RequestMapping(value = "/api/favouriteBooks")
 public class FavouriteBooksController {
 
 	@Autowired

@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/conversation")
+@RequestMapping(value = "/api/conversation")
 public class ConversationController {
 
 	@Autowired

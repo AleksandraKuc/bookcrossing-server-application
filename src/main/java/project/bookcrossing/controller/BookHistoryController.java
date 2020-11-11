@@ -10,7 +10,7 @@ import project.bookcrossing.dto.bookHistory.BookHistoryResponseDTO;
 import project.bookcrossing.service.BookHistoryService;
 
 @RestController
-@RequestMapping(value = "/history")
+@RequestMapping(value = "/api/history")
 public class BookHistoryController {
 
 	@Autowired

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/historyUsers")
+@RequestMapping(value = "/api/historyUsers")
 public class HistoryUsersController {
 
 	@Autowired
@@ -91,7 +91,7 @@ public class HistoryUsersController {
 		return modelMapper.map(historyUsersService.updateHistoryUsers(historyId, userId), HistoryUserResponseDTO.class);
 	}
 
-	@DeleteMapping(value = "/{historyId}")
+	@DeleteMapping(value = "/delete/{historyId}")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
 	@ApiOperation(value = "${HistoryUsersController.delete}", authorizations = { @Authorization(value="apiKey") })
 	@ApiResponses(value = {//
@@ -104,7 +104,7 @@ public class HistoryUsersController {
 		return historyId;
 	}
 
-	@DeleteMapping(value = "/{userId}")
+	@DeleteMapping(value = "/deleteByUser/{userId}")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
 	@ApiOperation(value = "${HistoryUsersController.deleteByUser}", authorizations = { @Authorization(value="apiKey") })
 	@ApiResponses(value = {//
