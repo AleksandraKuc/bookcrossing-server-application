@@ -12,12 +12,15 @@ import project.bookcrossing.dto.user.UserResponseDTO;
 import project.bookcrossing.entity.Book;
 import project.bookcrossing.entity.FavouriteBooks;
 import project.bookcrossing.entity.FavouritesKey;
+import project.bookcrossing.entity.User;
 import project.bookcrossing.service.BookService;
 import project.bookcrossing.service.FavouriteBooksService;
+import project.bookcrossing.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping(value = "/api/favouriteBooks")
 public class FavouriteBooksController {
@@ -27,17 +30,20 @@ public class FavouriteBooksController {
 	@Autowired
 	private BookService bookService;
 	@Autowired
+	private UserService userService;
+	@Autowired
 	private ModelMapper modelMapper;
 
-	@PostMapping("/create/{userId}/{bookId}")
+	@PostMapping("/create/{username}/{bookId}")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
 	@ApiOperation(value = "${FavouriteBooksController.create}")
 	@ApiResponses(value = {//
 			@ApiResponse(code = 400, message = "Something went wrong"), //
 			@ApiResponse(code = 403, message = "Access denied")})
-	public FavouriteBooksResponseDTO create(@ApiParam("UserId") @PathVariable long userId,
+	public FavouriteBooksResponseDTO create(@ApiParam("Username") @PathVariable String username,
 											@ApiParam("BookId") @PathVariable long bookId) {
-		return modelMapper.map(favouriteBooksService.create(userId, bookId), FavouriteBooksResponseDTO.class);
+		User user = userService.search(username);
+		return modelMapper.map(favouriteBooksService.create(user.getId(), bookId), FavouriteBooksResponseDTO.class);
 	}
 
 	@GetMapping(value = "/search/{userId}")
@@ -54,6 +60,18 @@ public class FavouriteBooksController {
 			response.add(modelMapper.map(book, BookResponseDTO.class));
 		}
 		return response;
+	}
+
+	@GetMapping(value = "/check/{username}/{bookId}")
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
+	@ApiOperation(value = "${FavouriteBooksController.searchByBook}")
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 404, message = "The user doesn't exist")})
+	public boolean searchByBook(@ApiParam("Usernamed") @PathVariable String username,
+										@ApiParam("BookId") @PathVariable long bookId) {
+		User user = userService.search(username);
+		return favouriteBooksService.checkIfFavourite(user.getId(), bookId);
 	}
 
 	@DeleteMapping(value = "/deleteByUser/{userId}")
@@ -84,7 +102,7 @@ public class FavouriteBooksController {
 		favouriteBooksService.deleteFromList(key);
 	}
 
-	@DeleteMapping(value = "/delete/{userId}/{bookId}")
+	@DeleteMapping(value = "/delete/{username}/{bookId}")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
 	@ApiOperation(value = "${FavouriteBooksController.delete}", authorizations = { @Authorization(value="apiKey") })
 	@ApiResponses(value = {//
@@ -92,9 +110,10 @@ public class FavouriteBooksController {
 			@ApiResponse(code = 403, message = "Access denied"), //
 			@ApiResponse(code = 404, message = "Fav_book doesn't exist"), //
 			@ApiResponse(code = 500, message = "Expired or invalid JWT token")})
-	public void deleteByBook(@ApiParam("UserId") @PathVariable long userId,
+	public void deleteByBook(@ApiParam("Username") @PathVariable String username,
 							 @ApiParam("BookId") @PathVariable long bookId) {
-		FavouritesKey key = new FavouritesKey(bookId, userId);
+		User user = userService.search(username);
+		FavouritesKey key = new FavouritesKey(bookId, user.getId());
 		favouriteBooksService.deleteByKey(key);
 	}
 

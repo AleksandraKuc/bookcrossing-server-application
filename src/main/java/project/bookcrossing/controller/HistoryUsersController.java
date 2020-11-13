@@ -14,6 +14,7 @@ import project.bookcrossing.service.HistoryUsersService;
 import java.util.ArrayList;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping(value = "/api/historyUsers")
 public class HistoryUsersController {
@@ -79,6 +80,7 @@ public class HistoryUsersController {
 		return response;
 	}
 
+	// TODO tutaj bookId i username!!
 	@PutMapping("/update/{historyId}/{userId}")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
 	@ApiOperation(value = "${HistoryUsersController.update}")

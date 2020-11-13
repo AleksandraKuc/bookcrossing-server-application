@@ -73,4 +73,17 @@ public class BookResponseDTO {
 	public void setHistory(BookHistory history) {
 		this.history = history;
 	}
+
+	@Override
+	public String toString() {
+		return "BookResponseDTO{" +
+				"id_book=" + id_book +
+				", title='" + title + '\'' +
+				", author='" + author + '\'' +
+				", description='" + description + '\'' +
+				", ISBN='" + ISBN + '\'' +
+				", category=" + category +
+				", history=" + history +
+				'}';
+	}
 }

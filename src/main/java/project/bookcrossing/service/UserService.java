@@ -9,6 +9,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import project.bookcrossing.dto.JwtResponse;
 import project.bookcrossing.entity.Role;
 import project.bookcrossing.entity.User;
 import project.bookcrossing.exception.CustomException;
@@ -16,6 +17,7 @@ import project.bookcrossing.repository.UserRepository;
 import project.bookcrossing.security.JwtTokenProvider;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,23 +36,35 @@ public class UserService {
 	@Autowired
 	private AuthenticationManager authenticationManager;
 
-	public String signin(String username, String password) {
+	public JwtResponse signin(String username, String password) {
 		try {
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-			return jwtTokenProvider.createToken(username, userRepository.findByUsername(username).getRoles());
+			User user = search(username);
+			return getToken(user);
 		} catch (AuthenticationException e) {
 			throw new CustomException("Invalid username/password supplied", HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 	}
 
-	public String signup(User user) {
+	public JwtResponse signup(User user) {
 		if (!userRepository.existsByUsername(user.getUsername())) {
 			user.setPassword(passwordEncoder.encode(user.getPassword()));
 			userRepository.save(user);
-			return jwtTokenProvider.createToken(user.getUsername(), user.getRoles());
+			return getToken(user);
 		} else {
 			throw new CustomException("Username is already in use", HttpStatus.UNPROCESSABLE_ENTITY);
 		}
+	}
+
+	private JwtResponse getToken(User user) {
+		String token = jwtTokenProvider.createToken(user.getUsername(), user.getRoles());
+		JwtResponse response = new JwtResponse();
+		response.setAccessToken(token);
+		response.setUsername(user.getUsername());
+		List<String> roles = new ArrayList<>();
+		user.getRoles().forEach(role -> roles.add(role.name()));
+		response.setAuthorities(roles);
+		return response;
 	}
 
 	public String update(User user) {
@@ -112,14 +126,18 @@ public class UserService {
 
 	public List<User> getAllUsers() {
 		List<User> users = (List<User>) userRepository.findAll();
+		List<User> usersToRemove = new ArrayList<>();
 		for (User user : users) {
 			List<Role> roles = user.getRoles();
 			for (Role role : roles) {
 				if (role.equals(Role.ROLE_ADMIN)){
-					users.remove(user);
+					usersToRemove.add(user);
 				}
 				break;
 			}
+		}
+		for (User user: usersToRemove) {
+			users.remove(user);
 		}
 		if (users.isEmpty()) {
 			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);

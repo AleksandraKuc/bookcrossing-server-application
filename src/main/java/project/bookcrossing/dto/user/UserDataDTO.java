@@ -1,5 +1,6 @@
 package project.bookcrossing.dto.user;
 
+import java.util.Arrays;
 import java.util.List;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -15,7 +16,7 @@ public class UserDataDTO {
 	@ApiModelProperty(position = 2)
 	private String password;
 	@ApiModelProperty(position = 3)
-	List<Role> roles;
+	String[] roles;
 	@ApiModelProperty(position = 4)
 	private String firstName;
 	@ApiModelProperty(position = 5)
@@ -91,11 +92,11 @@ public class UserDataDTO {
 		this.phoneNumber = phoneNumber;
 	}
 
-	public List<Role> getRoles() {
+	public String[] getRoles() {
 		return roles;
 	}
 
-	public void setRoles(List<Role> roles) {
+	public void setRoles(String[] roles) {
 		this.roles = roles;
 	}
 
@@ -105,7 +106,7 @@ public class UserDataDTO {
 				"username='" + username + '\'' +
 				", email='" + email + '\'' +
 				", password='" + password + '\'' +
-				", roles=" + roles +
+				", roles=" + Arrays.toString(roles) +
 				", firstName='" + firstName + '\'' +
 				", lastName='" + lastName + '\'' +
 				", city='" + city + '\'' +
