@@ -34,11 +34,18 @@ public class FavouriteBooksService {
 
 		book.setId_favouriteBooks(key);
 		key.setId_user(userId);
-		List<FavouriteBooks> results = getByKey(book);
-		if (results.isEmpty()) {
-			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);
-		}
-		return results;
+		//		if (results.isEmpty()) {
+//			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);
+//		}
+		return getByKey(book);
+	}
+
+	public boolean checkIfFavourite(long userId, long bookId) {
+		FavouritesKey key = new FavouritesKey(bookId, userId);
+		FavouriteBooks book = new FavouriteBooks();
+		book.setId_favouriteBooks(key);
+		List<FavouriteBooks> books = getByKey(book);
+		return !books.isEmpty();
 	}
 
 	public void deleteFromList(FavouritesKey fav_key){

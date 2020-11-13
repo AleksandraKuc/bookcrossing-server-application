@@ -36,10 +36,8 @@ public class BookService {
 
 	public Book searchById(long id) {
 		Optional<Book> book = bookRepository.findById(id);
-		if (book.isEmpty()) {
-			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);
-		}
-		return book.get();
+		//			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);
+		return book.orElse(null);
 	}
 
 	public List<Book> searchByTitleCategory(String title, String category) {

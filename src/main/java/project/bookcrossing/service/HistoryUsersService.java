@@ -115,14 +115,14 @@ public class HistoryUsersService {
 			}
 		}
 		if (type.equals("currentUser")){
-			if (currentUsersList.isEmpty()){
-				throw new CustomException("Current historyUser doesn't exist", HttpStatus.NOT_FOUND);
-			}
+//			if (currentUsersList.isEmpty()){
+//				throw new CustomException("Current historyUser doesn't exist", HttpStatus.NOT_FOUND);
+//			}
 			return currentUsersList;
 		} else {
-			if (firstUsersList.isEmpty()) {
-				throw new CustomException("First historyUser doesn't exist", HttpStatus.NOT_FOUND);
-			}
+//			if (firstUsersList.isEmpty()) {
+//				throw new CustomException("First historyUser doesn't exist", HttpStatus.NOT_FOUND);
+//			}
 			return firstUsersList;
 		}
 
@@ -131,10 +131,9 @@ public class HistoryUsersService {
 	private List<HistoryUsers> getByKey(HistoryUsers historyUser) {
 		Example<HistoryUsers> historyExample = Example.of(historyUser);
 
-		List<HistoryUsers> results = historyUsersRepository.findAll(historyExample);
-		if (results.isEmpty()) {
-			throw new CustomException("The history user doesn't exist", HttpStatus.NOT_FOUND);
-		}
-		return results;
+		//		if (results.isEmpty()) {
+//			throw new CustomException("The history user doesn't exist", HttpStatus.NOT_FOUND);
+//		}
+		return historyUsersRepository.findAll(historyExample);
 	}
 }

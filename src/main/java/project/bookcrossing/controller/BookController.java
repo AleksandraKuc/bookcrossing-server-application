@@ -16,12 +16,15 @@ import project.bookcrossing.service.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping(value = "/api/book")
 public class BookController {
 
 	@Autowired
 	private BookService bookService;
+	@Autowired
+	private UserService userService;
 	@Autowired
 	private HistoryUsersService historyUsersService;
 	@Autowired
@@ -98,24 +101,37 @@ public class BookController {
 	}
 
 
-	@GetMapping(value = "/user/{userId}")
+	@GetMapping(value = "/user/{username}")
 	@ApiOperation(value = "${BookController.getByUser}", response = BookResponseDTO.class)
 	@ApiResponses(value = {//
 			@ApiResponse(code = 400, message = "Something went wrong"), //
 			@ApiResponse(code = 404, message = "The user doesn't exist")})
-	public List<BookResponseDTO> getByUser(@ApiParam("User") @PathVariable long userId) {
+	public List<BookResponseDTO> getByUser(@ApiParam("User") @PathVariable String username) {
 		List<BookResponseDTO> books = new ArrayList<>();
-		List<HistoryUsers> historyUsers = historyUsersService.searchByCurrentUserKey(userId);
+		User user = userService.search(username);
+		List<HistoryUsers> historyUsers = historyUsersService.searchByCurrentUserKey(user.getId());
 		for (HistoryUsers item : historyUsers){
 			BookHistory bookHistory = bookHistoryService.searchById(item.getId_historyUsers().getId_history());
 			Book book = bookService.getBookByHistory(bookHistory);
 			books.add(modelMapper.map(book, BookResponseDTO.class));
 		}
-		if (books.isEmpty()){
-			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
-		} else {
-			return books;
+		return books;
+	}
+
+	@GetMapping(value = "/fav/{username}")
+	@ApiOperation(value = "${BookController.getByUser}", response = BookResponseDTO.class)
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 404, message = "The user doesn't exist")})
+	public List<BookResponseDTO> getFavByUser(@ApiParam("User") @PathVariable String username) {
+		List<BookResponseDTO> books = new ArrayList<>();
+		User user = userService.search(username);
+		List<FavouriteBooks> favourites = favouriteBooksService.search(user.getId());
+		for (FavouriteBooks fav : favourites){
+			Book book = bookService.searchById(fav.getId_favouriteBooks().getId_book());
+			books.add(modelMapper.map(book, BookResponseDTO.class));
 		}
+		return books;
 	}
 
 	@PostMapping("/create/{userId}")

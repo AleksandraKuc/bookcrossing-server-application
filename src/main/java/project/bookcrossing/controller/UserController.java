@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import project.bookcrossing.dto.JwtResponse;
+import project.bookcrossing.dto.user.LoginDataDTO;
 import project.bookcrossing.dto.user.UserDataDTO;
 import project.bookcrossing.dto.user.UserResponseDTO;
 import project.bookcrossing.entity.FavouritesKey;
@@ -19,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping(value = "/api/user")
 public class UserController {
@@ -40,9 +43,8 @@ public class UserController {
 	@ApiResponses(value = {//
 			@ApiResponse(code = 400, message = "Something went wrong"), //
 			@ApiResponse(code = 422, message = "Invalid username/password supplied")})
-	public String login(@ApiParam("Username") @RequestParam String username, //
-						@ApiParam("Password") @RequestParam String password) {
-		return userService.signin(username, password);
+	public JwtResponse login(@ApiParam("credentials") @RequestBody LoginDataDTO credentials) {
+		return userService.signin(credentials.getUsername(), credentials.getPassword());
 	}
 
 	@PostMapping("/signup")
@@ -51,7 +53,7 @@ public class UserController {
 			@ApiResponse(code = 400, message = "Something went wrong"), //
 			@ApiResponse(code = 403, message = "Access denied"), //
 			@ApiResponse(code = 422, message = "Username is already in use")})
-	public String signup(@ApiParam("Signup User") @RequestBody UserDataDTO user) {
+	public JwtResponse signup(@ApiParam("Signup User") @RequestBody UserDataDTO user) {
 		return userService.signup(modelMapper.map(user, User.class));
 	}
 
