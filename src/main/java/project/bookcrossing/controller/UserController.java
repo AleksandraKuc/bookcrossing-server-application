@@ -133,7 +133,7 @@ public class UserController {
 			@ApiResponse(code = 400, message = "Something went wrong"), //
 			@ApiResponse(code = 403, message = "Access denied"), //
 			@ApiResponse(code = 422, message = "Username is already in use")})
-	public String update(@ApiParam("Update User") @RequestBody UserDataDTO user) {
+	public JwtResponse update(@ApiParam("Update User") @RequestBody UserDataDTO user) {
 		return userService.update(modelMapper.map(user, User.class));
 	}
 

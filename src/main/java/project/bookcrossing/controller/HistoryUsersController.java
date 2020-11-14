@@ -7,9 +7,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import project.bookcrossing.dto.historyUsers.HistoryUserResponseDTO;
+import project.bookcrossing.entity.Book;
 import project.bookcrossing.entity.HistoryUsers;
+import project.bookcrossing.entity.User;
 import project.bookcrossing.service.BookHistoryService;
+import project.bookcrossing.service.BookService;
 import project.bookcrossing.service.HistoryUsersService;
+import project.bookcrossing.service.UserService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +27,10 @@ public class HistoryUsersController {
 	private HistoryUsersService historyUsersService;
 	@Autowired
 	private BookHistoryService historyService;
+	@Autowired
+	private BookService bookService;
+	@Autowired
+	private UserService userService;
 	@Autowired
 	private ModelMapper modelMapper;
 
@@ -80,17 +88,19 @@ public class HistoryUsersController {
 		return response;
 	}
 
-	// TODO tutaj bookId i username!!
-	@PutMapping("/update/{historyId}/{userId}")
+	@PutMapping("/update/{bookId}/{username}")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
 	@ApiOperation(value = "${HistoryUsersController.update}")
 	@ApiResponses(value = {//
 			@ApiResponse(code = 400, message = "Something went wrong"), //
 			@ApiResponse(code = 403, message = "Access denied")})
-	public HistoryUserResponseDTO update(@ApiParam("HistoryId") @PathVariable long historyId,
-										 @ApiParam("UserId") @PathVariable long userId) {
+	public HistoryUserResponseDTO update(@ApiParam("BookId") @PathVariable long bookId,
+										 @ApiParam("Username") @PathVariable String username) {
+		Book book = bookService.searchById(bookId);
+		long historyId = book.getHistory().getId_history();
+		User user = userService.search(username);
 		historyService.updateBookHireDate(historyId);
-		return modelMapper.map(historyUsersService.updateHistoryUsers(historyId, userId), HistoryUserResponseDTO.class);
+		return modelMapper.map(historyUsersService.updateHistoryUsers(historyId, user.getId()), HistoryUserResponseDTO.class);
 	}
 
 	@DeleteMapping(value = "/delete/{historyId}")

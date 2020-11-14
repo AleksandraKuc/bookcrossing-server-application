@@ -40,11 +40,9 @@ public class MessageController {
 			@ApiResponse(code = 403, message = "Access denied"), //
 			@ApiResponse(code = 422, message = "Username is already in use")})
 	public MessageResponseDTO create(@ApiParam("Message") @RequestBody MessageDataDTO message) {
-		User user = userService.searchById(message.getSenderId());
+		User user = userService.search(message.getSender());
 		Conversation conversation = conversationService.searchById(message.getConversationId());
-		return modelMapper.map(
-				messageService.createMessage(modelMapper.map(message, Message.class), user, conversation),
-				MessageResponseDTO.class);
+		return messageService.createMessage(modelMapper.map(message, Message.class), user, conversation);
 	}
 
 	@GetMapping(value = "/get/{conversationId}")
@@ -55,12 +53,7 @@ public class MessageController {
 			@ApiResponse(code = 404, message = "The conversation doesn't exist")})
 	public List<MessageResponseDTO> searchByConversation(@ApiParam("ConversationId") @PathVariable long conversationId) {
 		Conversation conversation = conversationService.searchById(conversationId);
-		List<Message> messages = messageService.searchByConversation(conversation);
-		List<MessageResponseDTO> response = new ArrayList<>();
-		for (Message message : messages) {
-			response.add(modelMapper.map(message, MessageResponseDTO.class));
-		}
-		return response;
+		return messageService.searchByConversation(conversation);
 	}
 
 	@GetMapping(value = "/getLast/{conversationId}")

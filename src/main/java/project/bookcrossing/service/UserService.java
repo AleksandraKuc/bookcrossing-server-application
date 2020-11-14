@@ -56,18 +56,7 @@ public class UserService {
 		}
 	}
 
-	private JwtResponse getToken(User user) {
-		String token = jwtTokenProvider.createToken(user.getUsername(), user.getRoles());
-		JwtResponse response = new JwtResponse();
-		response.setAccessToken(token);
-		response.setUsername(user.getUsername());
-		List<String> roles = new ArrayList<>();
-		user.getRoles().forEach(role -> roles.add(role.name()));
-		response.setAuthorities(roles);
-		return response;
-	}
-
-	public String update(User user) {
+	public JwtResponse update(User user) {
 		User userData = userRepository.findByUsername(user.getUsername());
 		if(userData != null){
 			user.setUsername(user.getUsername() != null ? user.getUsername() : userData.getUsername());
@@ -82,10 +71,21 @@ public class UserService {
 			user.setStartDate(userData.getStartDate());
 			user.setAddedBooks(userData.getAddedBooks());
 			userRepository.save(user);
-			return jwtTokenProvider.createToken(user.getUsername(), user.getRoles());
+			return getToken(user);
 		} else {
 			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);
 		}
+	}
+
+	private JwtResponse getToken(User user) {
+		String token = jwtTokenProvider.createToken(user.getUsername(), user.getRoles());
+		JwtResponse response = new JwtResponse();
+		response.setAccessToken(token);
+		response.setUsername(user.getUsername());
+		List<String> roles = new ArrayList<>();
+		user.getRoles().forEach(role -> roles.add(role.name()));
+		response.setAuthorities(roles);
+		return response;
 	}
 
 	public void delete(String username) {

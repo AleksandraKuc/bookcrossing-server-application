@@ -7,7 +7,7 @@ public class MessageDataDTO {
 	@ApiModelProperty(position = 0)
 	private String content;
 	@ApiModelProperty(position = 1)
-	private long senderId;
+	private String sender;
 	@ApiModelProperty(position = 2)
 	private long conversationId;
 
@@ -19,12 +19,12 @@ public class MessageDataDTO {
 		this.content = content;
 	}
 
-	public long getSenderId() {
-		return senderId;
+	public String getSender() {
+		return sender;
 	}
 
-	public void setSenderId(long senderId) {
-		this.senderId = senderId;
+	public void setSender(String senderId) {
+		this.sender = senderId;
 	}
 
 	public long getConversationId() {
@@ -33,5 +33,14 @@ public class MessageDataDTO {
 
 	public void setConversationId(long conversationId) {
 		this.conversationId = conversationId;
+	}
+
+	@Override
+	public String toString() {
+		return "MessageDataDTO{" +
+				"content='" + content + '\'' +
+				", senderName='" + sender + '\'' +
+				", conversationId=" + conversationId +
+				'}';
 	}
 }

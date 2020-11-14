@@ -15,9 +15,17 @@ public class MessageResponseDTO {
 	@ApiModelProperty(position = 2)
 	private Date date;
 	@ApiModelProperty(position = 3)
-	private User sender;
+	private String sender;
 	@ApiModelProperty(position = 4)
-	private Conversation conversation;
+	private long conversationId;
+
+	public MessageResponseDTO(long idMessage, String content, Date date, String sender, long conversationId) {
+		this.idMessage = idMessage;
+		this.content = content;
+		this.date = date;
+		this.sender = sender;
+		this.conversationId = conversationId;
+	}
 
 	public long getIdMessage() {
 		return idMessage;
@@ -43,19 +51,19 @@ public class MessageResponseDTO {
 		this.date = date;
 	}
 
-	public User getSender() {
+	public String getSender() {
 		return sender;
 	}
 
-	public void setSender(User sender) {
+	public void setSender(String sender) {
 		this.sender = sender;
 	}
 
-	public Conversation getConversation() {
-		return conversation;
+	public long getConversation() {
+		return conversationId;
 	}
 
-	public void setConversation(Conversation conversation) {
-		this.conversation = conversation;
+	public void setConversation(long conversation) {
+		this.conversationId = conversation;
 	}
 }
