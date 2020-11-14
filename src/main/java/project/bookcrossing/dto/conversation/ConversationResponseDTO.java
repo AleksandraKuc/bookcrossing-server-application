@@ -4,14 +4,17 @@ import io.swagger.annotations.ApiModelProperty;
 
 import project.bookcrossing.entity.User;
 
-import java.util.List;
-
 public class ConversationResponseDTO {
 
 	@ApiModelProperty(position = 0)
 	private long id_conversation;
 	@ApiModelProperty(position = 1)
-	private List<User> conversationUsers;
+	private final UserConv recipient = new UserConv();
+
+	public ConversationResponseDTO(long id_conversation, User firstUser) {
+		this.id_conversation = id_conversation;
+		this.setRecipient(firstUser);
+	}
 
 	public long getId_conversation() {
 		return id_conversation;
@@ -21,11 +24,34 @@ public class ConversationResponseDTO {
 		this.id_conversation = id_conversation;
 	}
 
-	public List<User> getConversationUsers() {
-		return conversationUsers;
+	public UserConv getFirstUser() {
+		return recipient;
 	}
 
-	public void setConversationUsers(List<User> conversationUsers) {
-		this.conversationUsers = conversationUsers;
+	public void setRecipient(User firstUser) {
+		this.recipient.setUsername(firstUser.getUsername());
+		this.recipient.setFirstname(firstUser.getFirstName());
+
+	}
+
+	private static class UserConv {
+		private String username;
+		private String firstname;
+
+		public void setUsername(String username) {
+			this.username = username;
+		}
+
+		public void setFirstname(String firstname) {
+			this.firstname = firstname;
+		}
+
+		public String getUsername() {
+			return username;
+		}
+
+		public String getFirstname() {
+			return firstname;
+		}
 	}
 }

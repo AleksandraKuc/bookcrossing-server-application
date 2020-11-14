@@ -101,6 +101,23 @@ public class BookController {
 	}
 
 
+	@GetMapping(value = "/addedByUser/{username}")
+	@ApiOperation(value = "${BookController.getAddedByUser}", response = BookResponseDTO.class)
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 404, message = "The user doesn't exist")})
+	public List<BookResponseDTO> getAddedByUser(@ApiParam("User") @PathVariable String username) {
+		List<BookResponseDTO> books = new ArrayList<>();
+		User user = userService.search(username);
+		List<HistoryUsers> historyUsers = historyUsersService.searchByFirstUserKey(user.getId());
+		for (HistoryUsers item : historyUsers){
+			BookHistory bookHistory = bookHistoryService.searchById(item.getId_historyUsers().getId_history());
+			Book book = bookService.getBookByHistory(bookHistory);
+			books.add(modelMapper.map(book, BookResponseDTO.class));
+		}
+		return books;
+	}
+
 	@GetMapping(value = "/user/{username}")
 	@ApiOperation(value = "${BookController.getByUser}", response = BookResponseDTO.class)
 	@ApiResponses(value = {//
@@ -134,7 +151,7 @@ public class BookController {
 		return books;
 	}
 
-	@PostMapping("/create/{userId}")
+	@PostMapping("/create/{username}")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
 	@ApiOperation(value = "${BookController.create}")
 	@ApiResponses(value = {//
@@ -142,10 +159,13 @@ public class BookController {
 			@ApiResponse(code = 403, message = "Access denied"), //
 			@ApiResponse(code = 422, message = "Username is already in use")})
 	public BookResponseDTO create(@ApiParam("Book") @RequestBody BookDataDTO book,
-								  @ApiParam("User") @PathVariable long userId) {
+								  @ApiParam("Username") @PathVariable String username) {
+		System.out.println(username);
+		System.out.println(book.toString());
+		User user = userService.search(username);
 		Book savedBook = bookService.create(modelMapper.map(book, Book.class));
 		long historyId = savedBook.getHistory().getId_history();
-		historyUsersService.createHistoryUsers(userId, historyId, "firstUser");
+		historyUsersService.createHistoryUsers(user.getId(), historyId, "firstUser");
 		return modelMapper.map(savedBook, BookResponseDTO.class);
 	}
 
