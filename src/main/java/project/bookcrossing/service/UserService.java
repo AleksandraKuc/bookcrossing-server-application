@@ -56,6 +56,18 @@ public class UserService {
 		}
 	}
 
+	public JwtResponse resetPassword(User user, String currentPassword, String newPassword){
+		try {
+			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), currentPassword));
+//			user.setPassword(newPassword);
+			user.setPassword(passwordEncoder.encode(newPassword));
+			userRepository.save(user);
+			return getToken(user);
+		} catch (AuthenticationException e) {
+			throw new CustomException("Invalid password supplied", HttpStatus.UNPROCESSABLE_ENTITY);
+		}
+	}
+
 	public JwtResponse update(User user) {
 		User userData = userRepository.findByUsername(user.getUsername());
 		if(userData != null){

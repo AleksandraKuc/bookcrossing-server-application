@@ -23,6 +23,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
+		System.out.println(httpServletRequest.getHeader("Authorization"));
 		String token = jwtTokenProvider.resolveToken(httpServletRequest);
 		try {
 			if (token != null && jwtTokenProvider.validateToken(token)) {
