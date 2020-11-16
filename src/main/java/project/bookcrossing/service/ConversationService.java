@@ -42,11 +42,7 @@ public class ConversationService {
 	}
 
 	public List<Conversation> searchByUser(User user) {
-		List<Conversation> conversations = conversationRepository.getAllByConversationUsers(user);
-		if (conversations.isEmpty()) {
-			throw new CustomException("The conversation doesn't exist", HttpStatus.NOT_FOUND);
-		}
-		return conversations;
+		return conversationRepository.getAllByConversationUsers(user);
 	}
 
 	public Conversation searchById(long conversationId) {
@@ -86,9 +82,11 @@ public class ConversationService {
 		for (Conversation conv : conversations) {
 			if ((conv.getFirstUser().getId() == first.getId() && conv.getSecondUser().getId() == second.getId()) ||
 					(conv.getFirstUser().getId() == second.getId() && conv.getSecondUser().getId() == first.getId())) {
+				System.out.println("true");
 				return true;
 			}
 		}
+		System.out.println("false");
 		return false;
 	}
 }

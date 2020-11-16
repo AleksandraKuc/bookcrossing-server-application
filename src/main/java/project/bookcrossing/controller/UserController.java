@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import project.bookcrossing.dto.JwtResponse;
 import project.bookcrossing.dto.user.LoginDataDTO;
+import project.bookcrossing.dto.user.ResetPasswordDataDTO;
 import project.bookcrossing.dto.user.UserDataDTO;
 import project.bookcrossing.dto.user.UserResponseDTO;
 import project.bookcrossing.entity.FavouritesKey;
@@ -44,6 +45,7 @@ public class UserController {
 			@ApiResponse(code = 400, message = "Something went wrong"), //
 			@ApiResponse(code = 422, message = "Invalid username/password supplied")})
 	public JwtResponse login(@ApiParam("credentials") @RequestBody LoginDataDTO credentials) {
+		System.out.println(credentials.toString());
 		return userService.signin(credentials.getUsername(), credentials.getPassword());
 	}
 
@@ -54,7 +56,20 @@ public class UserController {
 			@ApiResponse(code = 403, message = "Access denied"), //
 			@ApiResponse(code = 422, message = "Username is already in use")})
 	public JwtResponse signup(@ApiParam("Signup User") @RequestBody UserDataDTO user) {
+		System.out.println(user.toString());
 		return userService.signup(modelMapper.map(user, User.class));
+	}
+
+	@PostMapping("/resetPassword")
+	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
+	@ApiOperation(value = "${UserController.resetPassword}")
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 403, message = "Access denied"), //
+			@ApiResponse(code = 422, message = "Username is already in use")})
+	public JwtResponse resetPassword(@ApiParam("NewPassword") @RequestBody ResetPasswordDataDTO data) {
+		User user = userService.search(data.getUsername());
+		return userService.resetPassword(user, data.getCurrentPassword(), data.getNewPassword());
 	}
 
 	@DeleteMapping(value = "/{username}")
