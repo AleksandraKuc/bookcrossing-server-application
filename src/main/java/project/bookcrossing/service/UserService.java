@@ -40,7 +40,11 @@ public class UserService {
 		try {
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 			User user = search(username);
-			return getToken(user);
+			if (user.getAccountStatus() == 0) {
+				return getToken(user);
+			} else {
+				throw new CustomException("Account blocked. Contact with administrator to get details", HttpStatus.UNPROCESSABLE_ENTITY);
+			}
 		} catch (AuthenticationException e) {
 			throw new CustomException("Invalid username/password supplied", HttpStatus.UNPROCESSABLE_ENTITY);
 		}
@@ -59,7 +63,6 @@ public class UserService {
 	public JwtResponse resetPassword(User user, String currentPassword, String newPassword){
 		try {
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), currentPassword));
-//			user.setPassword(newPassword);
 			user.setPassword(passwordEncoder.encode(newPassword));
 			userRepository.save(user);
 			return getToken(user);
@@ -71,19 +74,15 @@ public class UserService {
 	public JwtResponse update(User user) {
 		User userData = userRepository.findByUsername(user.getUsername());
 		if(userData != null){
-			user.setUsername(user.getUsername() != null ? user.getUsername() : userData.getUsername());
-			user.setFirstName(user.getFirstName() != null ? user.getFirstName() : userData.getFirstName());
-			user.setLastName(user.getLastName() != null ? user.getLastName() : userData.getLastName());
-			user.setEmail(user.getEmail() != null ? user.getEmail() : userData.getEmail());
-			user.setCity(user.getCity() != null ? user.getCity() : userData.getCity());
-			user.setProvince(user.getProvince() != null ? user.getProvince() : userData.getProvince());
-			user.setPhoneNumber(user.getPhoneNumber() != 0 ? user.getPhoneNumber() : userData.getPhoneNumber());
-			user.setPassword(userData.getPassword());
-			user.setId(userData.getId());
-			user.setStartDate(userData.getStartDate());
-			user.setAddedBooks(userData.getAddedBooks());
-			userRepository.save(user);
-			return getToken(user);
+			userData.setUsername(user.getUsername() != null ? user.getUsername() : userData.getUsername());
+			userData.setFirstName(user.getFirstName() != null ? user.getFirstName() : userData.getFirstName());
+			userData.setLastName(user.getLastName() != null ? user.getLastName() : userData.getLastName());
+			userData.setEmail(user.getEmail() != null ? user.getEmail() : userData.getEmail());
+			userData.setCity(user.getCity() != null ? user.getCity() : userData.getCity());
+			userData.setProvince(user.getProvince() != null ? user.getProvince() : userData.getProvince());
+			userData.setPhoneNumber(user.getPhoneNumber() != 0 ? user.getPhoneNumber() : userData.getPhoneNumber());
+			userRepository.save(userData);
+			return getToken(userData);
 		} else {
 			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);
 		}
@@ -155,6 +154,12 @@ public class UserService {
 			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);
 		}
 		return users;
+	}
+
+	public User updateAccountStatus(String username) {
+		User user = search(username);
+		user.setAccountStatus( user.getAccountStatus() == 0 ? 1 : 0 );
+		return userRepository.save(user);
 	}
 
 }

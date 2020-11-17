@@ -28,12 +28,6 @@ public class Conversation {
 		this.conversationUsers.add(1, secondUser);
 	}
 
-	public Conversation(User firstUser, User secondUser, List<Message> messageList) {
-		this.conversationUsers = new ArrayList<>();
-		this.conversationUsers.add(0, firstUser);
-		this.conversationUsers.add(1, secondUser);
-	}
-
 	public long getId_conversation() { return this.id_conversation; }
 
 	public User getFirstUser() {
