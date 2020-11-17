@@ -30,6 +30,8 @@ public class UserResponseDTO {
 	private Date startDate;
 	@ApiModelProperty(position = 10)
 	private int addedBooks;
+	@ApiModelProperty(position = 11)
+	private int accountStatus;
 
 	public Integer getId() {
 		return id;
@@ -117,5 +119,13 @@ public class UserResponseDTO {
 
 	public void setAddedBooks(int addedBooks) {
 		this.addedBooks = addedBooks;
+	}
+
+	public int getAccountStatus() {
+		return accountStatus;
+	}
+
+	public void setAccountStatus(int accountStatus) {
+		this.accountStatus = accountStatus;
 	}
 }

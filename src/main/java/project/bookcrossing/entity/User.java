@@ -26,6 +26,10 @@ public class User {
 	private String city;
 	@Column(nullable = false)
 	private String province;
+	@Column(nullable = false)
+	private int accountStatus;
+	@Column(nullable = false)
+	private int reported;
 	private long phoneNumber;
 	private Date startDate;
 	private int addedBooks;
@@ -36,7 +40,7 @@ public class User {
 	public User(){
 	}
 
-	public User(String username, String password, String firstName, String lastName, String email, String city, String province, long phoneNumber, Date startDate, int addedBooks) {
+	public User(String username, String password, String firstName, String lastName, String email, String city, String province, long phoneNumber, Date startDate, int addedBooks, int accountStatus) {
 		this.username = username;
 		this.password = password;
 		this.firstName = firstName;
@@ -47,9 +51,10 @@ public class User {
 		this.phoneNumber = phoneNumber;
 		this.startDate = startDate;
 		this.addedBooks = addedBooks;
+		this.accountStatus = accountStatus;
 	}
 
-	public User(String username, String password, String firstName, String lastName, String email, String city, String province, long phoneNumber) {
+	public User(String username, String password, String firstName, String lastName, String email, String city, String province, long phoneNumber, int accountStatus) {
 		this.username = username;
 		this.password = password;
 		this.firstName = firstName;
@@ -58,6 +63,7 @@ public class User {
 		this.city = city;
 		this.province = province;
 		this.phoneNumber = phoneNumber;
+		this.accountStatus = accountStatus;
 	}
 
 	public long getId() { return id_user; }
@@ -146,6 +152,14 @@ public class User {
 
 	public void setRoles(List<Role> roles) { this.roles = roles; }
 
+	public int getAccountStatus() {
+		return accountStatus;
+	}
+
+	public void setAccountStatus(int accountStatus) {
+		this.accountStatus = accountStatus;
+	}
+
 	@Override
 	public String toString() {
 		return "User{" +
@@ -160,6 +174,7 @@ public class User {
 				", phoneNumber=" + phoneNumber +
 				", startDate=" + startDate +
 				", addedBooks=" + addedBooks +
+				", accountStatus=" + accountStatus +
 				'}';
 	}
 }

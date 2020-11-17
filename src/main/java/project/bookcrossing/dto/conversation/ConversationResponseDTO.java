@@ -11,9 +11,9 @@ public class ConversationResponseDTO {
 	@ApiModelProperty(position = 1)
 	private final UserConv recipient = new UserConv();
 
-	public ConversationResponseDTO(long id_conversation, User firstUser) {
+	public ConversationResponseDTO(long id_conversation, User recipient) {
 		this.id_conversation = id_conversation;
-		this.setRecipient(firstUser);
+		this.setRecipient(recipient);
 	}
 
 	public long getId_conversation() {
@@ -24,14 +24,13 @@ public class ConversationResponseDTO {
 		this.id_conversation = id_conversation;
 	}
 
-	public UserConv getFirstUser() {
+	public UserConv getRecipient() {
 		return recipient;
 	}
 
-	public void setRecipient(User firstUser) {
-		this.recipient.setUsername(firstUser.getUsername());
-		this.recipient.setFirstname(firstUser.getFirstName());
-
+	public void setRecipient(User recipient) {
+		this.recipient.setUsername(recipient.getUsername());
+		this.recipient.setFirstname(recipient.getFirstName());
 	}
 
 	private static class UserConv {

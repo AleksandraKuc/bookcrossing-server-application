@@ -38,14 +38,12 @@ public class UserController {
 	@Autowired
 	private ModelMapper modelMapper;
 
-
 	@PostMapping("/signin")
 	@ApiOperation(value = "${UserController.signin}")
 	@ApiResponses(value = {//
 			@ApiResponse(code = 400, message = "Something went wrong"), //
 			@ApiResponse(code = 422, message = "Invalid username/password supplied")})
 	public JwtResponse login(@ApiParam("credentials") @RequestBody LoginDataDTO credentials) {
-		System.out.println(credentials.toString());
 		return userService.signin(credentials.getUsername(), credentials.getPassword());
 	}
 
@@ -80,7 +78,7 @@ public class UserController {
 			@ApiResponse(code = 403, message = "Access denied"), //
 			@ApiResponse(code = 404, message = "The user doesn't exist"), //
 			@ApiResponse(code = 500, message = "Expired or invalid JWT token")})
-	public String delete(@ApiParam("Username") @PathVariable String username) {
+	public void delete(@ApiParam("Username") @PathVariable String username) {
 		User user = userService.search(username);
 		//delete favourites books
 		FavouritesKey key = new FavouritesKey();
@@ -91,7 +89,6 @@ public class UserController {
 		// delete user from books history
 		historyUsersService.deleteByUser(user.getId());
 		userService.delete(username);
-		return username;
 	}
 
 	@GetMapping(value = "/username/{username}")
@@ -127,16 +124,18 @@ public class UserController {
 		return modelMapper.map(userService.searchById(id), UserResponseDTO.class);
 	}
 
-	@GetMapping(value = "/all")
+	@GetMapping(value = "/all/{filterResults}")
 	@ApiOperation(value = "${UserController.getAll}", response = UserResponseDTO.class)
 	@ApiResponses(value = {//
 			@ApiResponse(code = 400, message = "Something went wrong"), //
 			@ApiResponse(code = 404, message = "The user doesn't exist")})
-	public List<UserResponseDTO> getAll() {
+	public List<UserResponseDTO> getAll(@ApiParam("Filter") @PathVariable boolean filterResults) {
 		List<User> users = userService.getAllUsers();
 		List<UserResponseDTO> response = new ArrayList<>();
 		for (User user : users) {
-			response.add(modelMapper.map(user, UserResponseDTO.class));
+			if (!(filterResults && user.getAccountStatus() == 1)){
+				response.add(modelMapper.map(user, UserResponseDTO.class));
+			}
 		}
 		return response;
 	}
@@ -150,6 +149,16 @@ public class UserController {
 			@ApiResponse(code = 422, message = "Username is already in use")})
 	public JwtResponse update(@ApiParam("Update User") @RequestBody UserDataDTO user) {
 		return userService.update(modelMapper.map(user, User.class));
+	}
+
+	@PutMapping("/changeStatus/{username}")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@ApiOperation(value = "${UserController.changeStatus}")
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 403, message = "Access denied")})
+	public UserResponseDTO changeStatus(@ApiParam("Username") @PathVariable String username) {
+		return modelMapper.map(userService.updateAccountStatus(username), UserResponseDTO.class);
 	}
 
 	@GetMapping(value = "/me")
