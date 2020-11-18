@@ -1,9 +1,6 @@
 package project.bookcrossing.controller;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import project.bookcrossing.dto.report.ReportDataDTO;
 import project.bookcrossing.dto.report.ReportResponseDTO;
 import project.bookcrossing.dto.user.UserResponseDTO;
+import project.bookcrossing.entity.Conversation;
 import project.bookcrossing.entity.Report;
 import project.bookcrossing.entity.User;
 import project.bookcrossing.service.ReportService;
@@ -58,5 +56,17 @@ public class ReportController {
 					report.getSecondUser().getUsername(), report.getDescription(), report.getDate()));
 		}
 		return response;
+	}
+
+	@DeleteMapping(value = "/delete/{reportId}")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@ApiOperation(value = "${ReportController.delete}", authorizations = { @Authorization(value="apiKey") })
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong"), //
+			@ApiResponse(code = 403, message = "Access denied"), //
+			@ApiResponse(code = 404, message = "The report doesn't exist"), //
+			@ApiResponse(code = 500, message = "Expired or invalid JWT token")})
+	public void deleteByConversation(@ApiParam("ReportId") @PathVariable long reportId) {
+		reportService.deleteReport(reportId);
 	}
 }
