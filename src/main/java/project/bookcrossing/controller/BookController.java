@@ -160,9 +160,8 @@ public class BookController {
 			@ApiResponse(code = 422, message = "Username is already in use")})
 	public BookResponseDTO create(@ApiParam("Book") @RequestBody BookDataDTO book,
 								  @ApiParam("Username") @PathVariable String username) {
-		System.out.println(username);
-		System.out.println(book.toString());
 		User user = userService.search(username);
+		userService.updateAddedBooks(user, 1);
 		Book savedBook = bookService.create(modelMapper.map(book, Book.class));
 		long historyId = savedBook.getHistory().getId_history();
 		historyUsersService.createHistoryUsers(user.getId(), historyId, "firstUser");
@@ -200,6 +199,10 @@ public class BookController {
 	public long delete(@ApiParam("BookId") @PathVariable long bookId) {
 		Book book = bookService.searchById(bookId);
 		long historyId = book.getHistory().getId_history();
+
+		HistoryUsers historyUser = historyUsersService.searchByHistory(historyId);
+		User firstUser = userService.searchById(historyUser.getId_historyUsers().getId_user());
+		userService.updateAddedBooks(firstUser, -1);
 
 		//delete records from history_users
 		historyUsersService.deleteByHistory(historyId);
