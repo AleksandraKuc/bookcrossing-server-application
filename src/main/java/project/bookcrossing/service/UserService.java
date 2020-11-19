@@ -162,4 +162,9 @@ public class UserService {
 		return userRepository.save(user);
 	}
 
+	public void updateAddedBooks(User user, int value) {
+		user.setAddedBooks(user.getAddedBooks() + value);
+		userRepository.save(user);
+	}
+
 }
