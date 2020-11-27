@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:8100"})
 @RestController
 @RequestMapping(value = "/api/user")
 public class UserController {
@@ -44,6 +44,7 @@ public class UserController {
 			@ApiResponse(code = 400, message = "Something went wrong"), //
 			@ApiResponse(code = 422, message = "Invalid username/password supplied")})
 	public JwtResponse login(@ApiParam("credentials") @RequestBody LoginDataDTO credentials) {
+		System.out.print(credentials.toString());
 		return userService.signin(credentials.getUsername(), credentials.getPassword());
 	}
 
@@ -108,6 +109,19 @@ public class UserController {
 	public List<UserResponseDTO> searchByNames(@ApiParam("FirstName") @PathVariable String firstname,
 											   @ApiParam("LastName") @PathVariable String lastname) {
 		List<User> users = userService.searchByNames(firstname, lastname);
+		List<UserResponseDTO> response = new ArrayList<>();
+		for (User user : users) {
+			response.add(modelMapper.map(user, UserResponseDTO.class));
+		}
+		return response;
+	}
+
+	@GetMapping(value = "/all/username/{username}")
+	@ApiOperation(value = "${UserController.searchAllByUsername}", response = UserResponseDTO.class)
+	@ApiResponses(value = {//
+			@ApiResponse(code = 400, message = "Something went wrong")})
+	public List<UserResponseDTO> searchAllByUsername(@ApiParam("Username") @PathVariable String username) {
+		List<User> users = userService.searchAllByUsername(username);
 		List<UserResponseDTO> response = new ArrayList<>();
 		for (User user : users) {
 			response.add(modelMapper.map(user, UserResponseDTO.class));

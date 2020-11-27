@@ -12,6 +12,7 @@ import java.util.List;
 public interface UserRepository extends CrudRepository<User, Long> {
 	User findByUsername(String username);
 	List<User> findByFirstNameAndLastName(String firstName, String lastName);
+	List<User> findByUsernameStartsWith(String username);
 
 	@Transactional
 	void deleteByUsername(String username);

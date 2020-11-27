@@ -9,7 +9,7 @@ public class Book implements Serializable{
 
 	@Id
 	@GeneratedValue(strategy= GenerationType.SEQUENCE)
-	private long id_book;
+	private long idBook;
 
 	@Column(nullable = false)
 	private String title;
@@ -22,6 +22,10 @@ public class Book implements Serializable{
 
 	@Column(nullable = false)
 	private BookCategory category;
+
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "image", referencedColumnName = "id_image")
+	private Images image;
 
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "history", referencedColumnName = "id_history")
@@ -37,12 +41,13 @@ public class Book implements Serializable{
 		this.category = category;
 	}
 
-	public Book(String title, String author, String description, String ISBN, BookCategory category, BookHistory bookHistory){
+	public Book(String title, String author, String description, String ISBN, BookCategory category, Images image, BookHistory bookHistory){
 		this.title = title;
 		this.author = author;
 		this.description = description;
 		this.ISBN = ISBN;
 		this.category = category;
+		this.image = image;
 		this.history = bookHistory;
 	}
 
@@ -71,7 +76,7 @@ public class Book implements Serializable{
 	}
 
 	public long getId_book(){
-		return id_book;
+		return idBook;
 	}
 
 	public BookHistory getHistory() {
@@ -83,7 +88,7 @@ public class Book implements Serializable{
 	}
 
 	public void setId_book(long id_book) {
-		this.id_book = id_book;
+		this.idBook = id_book;
 	}
 
 	public void setTitle(String title) {
@@ -102,15 +107,24 @@ public class Book implements Serializable{
 		this.category = category;
 	}
 
+	public Images getImage() {
+		return image;
+	}
+
+	public void setImage(Images image) {
+		this.image = image;
+	}
+
 	@Override
 	public String toString() {
 		return "Book{" +
-				"id_book=" + id_book +
+				"id_book=" + idBook +
 				", title='" + title + '\'' +
 				", author='" + author + '\'' +
 				", description='" + description + '\'' +
 				", ISBN='" + ISBN + '\'' +
 				", category=" + category +
+				", image=" + image.toString() +
 				'}';
 	}
 }

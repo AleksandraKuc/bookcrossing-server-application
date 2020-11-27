@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 import project.bookcrossing.entity.BookCategory;
 import project.bookcrossing.entity.BookHistory;
+import project.bookcrossing.entity.Images;
 
 public class BookResponseDTO {
 
@@ -21,6 +22,8 @@ public class BookResponseDTO {
 	private BookCategory category;
 	@ApiModelProperty(position = 6)
 	private BookHistory history;
+	@ApiModelProperty(position = 7)
+	private Images image;
 
 	public long getId_book() { return id_book; }
 
@@ -72,6 +75,14 @@ public class BookResponseDTO {
 
 	public void setHistory(BookHistory history) {
 		this.history = history;
+	}
+
+	public Images getImage() {
+		return image;
+	}
+
+	public void setImage(Images image) {
+		this.image = image;
 	}
 
 	@Override
