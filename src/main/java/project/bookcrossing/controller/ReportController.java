@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import project.bookcrossing.dto.report.ReportDataDTO;
 import project.bookcrossing.dto.report.ReportResponseDTO;
-import project.bookcrossing.dto.user.UserResponseDTO;
-import project.bookcrossing.entity.Conversation;
 import project.bookcrossing.entity.Report;
 import project.bookcrossing.entity.User;
 import project.bookcrossing.service.ReportService;
@@ -18,7 +16,7 @@ import project.bookcrossing.service.UserService;
 import java.util.ArrayList;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:8100"})
 @RestController
 @RequestMapping(value = "/api/report")
 public class ReportController {

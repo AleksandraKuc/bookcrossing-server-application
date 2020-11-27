@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import project.bookcrossing.entity.*;
 import project.bookcrossing.exception.CustomException;
 import project.bookcrossing.repository.BookRepository;
+import project.bookcrossing.repository.ImagesRepository;
 
 import java.util.Date;
 import java.util.List;
@@ -19,19 +20,26 @@ public class BookService {
 	private BookRepository bookRepository;
 	@Autowired
 	private BookHistoryService historyService;
+	@Autowired
+	private ImagesRepository imagesRepository;
 
 	public Book create(Book book) {
 		BookHistory bookHistory = new BookHistory(new Date(), new Date());
 		book.setHistory(bookHistory);
+		Optional<Images> image = imagesRepository.findById(book.getImage().getId_image());
+		image.ifPresent(book::setImage);
 		return bookRepository.save(book);
 	}
 
-	public List<Book> getAllBooks() {
-		List<Book> books = (List<Book>) bookRepository.findAll();
-		if (books.isEmpty()) {
-			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
+	public List<Book> getAllBooks(String title, String category) {
+		if (!title.equals("") && !category.equals("")) {
+			return searchByTitleCategory(title, category);
+		} else if (!title.equals("")) {
+			return searchByTitle(title);
+		} else if (!category.equals("")) {
+			return searchByCategory(category);
 		}
-		return books;
+		return (List<Book>) bookRepository.findAll();
 	}
 
 	public Book searchById(long id) {
@@ -41,27 +49,15 @@ public class BookService {
 	}
 
 	public List<Book> searchByTitleCategory(String title, String category) {
-		List<Book> books = bookRepository.findByTitleStartsWithAndCategory(title, BookCategory.getEnumCategory(category));
-		if (books.isEmpty()) {
-			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
-		}
-		return books;
+		return bookRepository.findByTitleStartsWithAndCategory(title, BookCategory.getEnumCategory(category));
 	}
 
 	public List<Book> searchByTitle(String title) {
-		List<Book> books = bookRepository.findByTitleStartsWith(title);
-		if (books.isEmpty()) {
-			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
-		}
-		return books;
+		return bookRepository.findByTitleStartsWith(title);
 	}
 
 	public List<Book> searchByCategory(String category) {
-		List<Book> books = bookRepository.findByCategory(BookCategory.getEnumCategory(category));
-		if (books.isEmpty()) {
-			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
-		}
-		return books;
+		return bookRepository.findByCategory(BookCategory.getEnumCategory(category));
 	}
 
 	public Book getBookByHistory(BookHistory bookHistory) {
@@ -107,9 +103,21 @@ public class BookService {
 
 	}
 
+	public boolean checkSearchParams(Book book, String title, String category) {
+		if (!title.equals("") && !category.equals("")) {
+			return book.getTitle().startsWith(title) && book.getCategory().toString().equals(category);
+		} else if (!title.equals("")) {
+			return book.getTitle().startsWith(title);
+		} else if (!category.equals("")) {
+			return book.getCategory().toString().equals(category);
+		}
+		return true;
+	}
+
 	// for update from HistoryUser class
 	public void updateBookHireDate(BookHistory history){
 		Book book = getBookByHistory(history);
 		updateLastHired(book.getId_book());
 	}
+
 }

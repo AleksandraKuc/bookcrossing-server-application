@@ -127,6 +127,10 @@ public class UserService {
 		return users;
 	}
 
+	public List<User> searchAllByUsername(String username) {
+		return userRepository.findByUsernameStartsWith(username);
+	}
+
 	public User whoami(HttpServletRequest req) {
 		return userRepository.findByUsername(jwtTokenProvider.getUsername(jwtTokenProvider.resolveToken(req)));
 	}

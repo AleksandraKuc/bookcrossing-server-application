@@ -18,7 +18,7 @@ import project.bookcrossing.service.UserService;
 import java.util.ArrayList;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:8100"})
 @RestController
 @RequestMapping(value = "/api/historyUsers")
 public class HistoryUsersController {
