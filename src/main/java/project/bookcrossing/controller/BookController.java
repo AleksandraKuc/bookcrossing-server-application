@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.multipart.MultipartFile;
 import project.bookcrossing.dto.book.BookDataDTO;
+import project.bookcrossing.dto.book.BookListResponseDTO;
 import project.bookcrossing.dto.book.BookResponseDTO;
 import project.bookcrossing.entity.*;
 import project.bookcrossing.repository.ImagesRepository;
@@ -46,14 +47,25 @@ public class BookController {
 	@ApiResponses(value = {//
 			@ApiResponse(code = 400, message = "Something went wrong"), //
 			@ApiResponse(code = 404, message = "The book doesn't exist")})
-	public List<BookResponseDTO> getAll(@ApiParam("title") @RequestParam String title,
-										@ApiParam("category") @RequestParam String category,
-										@ApiParam("username") @RequestParam String username) {
+	public BookListResponseDTO getAll(@ApiParam("title") @RequestParam String title,
+									  @ApiParam("category") @RequestParam String category,
+									  @ApiParam("maxResults") @RequestParam String maxResults,
+									  @ApiParam("page") @RequestParam String page,
+									  @ApiParam("username") @RequestParam String username) {
 		List<Book> books = bookService.getAllBooks(title, category);
+		BookListResponseDTO response = new BookListResponseDTO();
+		response.setAmountAll(books.size());
+
+		int startIndex = Integer.parseInt(page) * Integer.parseInt(maxResults);
+		int endIndex = startIndex + Integer.parseInt(maxResults);
+		endIndex = Math.min(endIndex, books.size());
+		books = books.subList(startIndex, endIndex);
 		if (username.equals("null")) {
-			return changeBookClass(books);
+			response.setBooks(changeBookClass(books));
+		} else {
+			response.setBooks(checkCurrentUser(books, username));
 		}
-		return checkCurrentUser(books, username);
+		return response;
 	}
 
 	@GetMapping(value = "/id/{id}")
@@ -148,19 +160,28 @@ public class BookController {
 	@ApiResponses(value = {//
 			@ApiResponse(code = 400, message = "Something went wrong"), //
 			@ApiResponse(code = 404, message = "The user doesn't exist")})
-	public List<BookResponseDTO> getFavByUser(@ApiParam("User") @PathVariable String username,
-											  @ApiParam("title") @RequestParam String title,
-											  @ApiParam("category") @RequestParam String category) {
+	public BookListResponseDTO getFavByUser(@ApiParam("User") @PathVariable String username,
+											@ApiParam("title") @RequestParam String title,
+											@ApiParam("maxResults") @RequestParam String maxResults,
+											@ApiParam("page") @RequestParam String page,
+											@ApiParam("category") @RequestParam String category) {
 		List<BookResponseDTO> books = new ArrayList<>();
+		BookListResponseDTO response = new BookListResponseDTO();
 		User user = userService.search(username);
 		List<FavouriteBooks> favourites = favouriteBooksService.search(user.getId());
 		for (FavouriteBooks fav : favourites){
 			Book book = bookService.searchById(fav.getId_favouriteBooks().getId_book());
-				if (bookService.checkSearchParams(book, title, category)) {
-					books.add(modelMapper.map(book, BookResponseDTO.class));
-				}
+			if (bookService.checkSearchParams(book, title, category)) {
+				books.add(modelMapper.map(book, BookResponseDTO.class));
+			}
 		}
-		return books;
+		response.setAmountAll(books.size());
+		int startIndex = Integer.parseInt(page) * Integer.parseInt(maxResults);
+		int endIndex = startIndex + Integer.parseInt(maxResults);
+		endIndex = Math.min(endIndex, books.size());
+		books = books.subList(startIndex, endIndex);
+		response.setBooks(books);
+		return response;
 	}
 
 	@PostMapping("/upload")

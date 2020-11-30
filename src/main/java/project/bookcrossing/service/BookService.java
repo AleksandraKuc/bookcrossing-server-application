@@ -26,8 +26,10 @@ public class BookService {
 	public Book create(Book book) {
 		BookHistory bookHistory = new BookHistory(new Date(), new Date());
 		book.setHistory(bookHistory);
-		Optional<Images> image = imagesRepository.findById(book.getImage().getId_image());
-		image.ifPresent(book::setImage);
+		if (book.getImage() != null) {
+			Optional<Images> image = imagesRepository.findById(book.getImage().getId_image());
+			image.ifPresent(book::setImage);
+		}
 		return bookRepository.save(book);
 	}
 
