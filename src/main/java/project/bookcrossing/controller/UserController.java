@@ -7,10 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import project.bookcrossing.dto.JwtResponse;
-import project.bookcrossing.dto.user.LoginDataDTO;
-import project.bookcrossing.dto.user.ResetPasswordDataDTO;
-import project.bookcrossing.dto.user.UserDataDTO;
-import project.bookcrossing.dto.user.UserResponseDTO;
+import project.bookcrossing.dto.user.*;
 import project.bookcrossing.entity.FavouritesKey;
 import project.bookcrossing.entity.User;
 import project.bookcrossing.service.ConversationService;
@@ -44,7 +41,6 @@ public class UserController {
 			@ApiResponse(code = 400, message = "Something went wrong"), //
 			@ApiResponse(code = 422, message = "Invalid username/password supplied")})
 	public JwtResponse login(@ApiParam("credentials") @RequestBody LoginDataDTO credentials) {
-		System.out.print(credentials.toString());
 		return userService.signin(credentials.getUsername(), credentials.getPassword());
 	}
 
@@ -55,7 +51,6 @@ public class UserController {
 			@ApiResponse(code = 403, message = "Access denied"), //
 			@ApiResponse(code = 422, message = "Username is already in use")})
 	public JwtResponse signup(@ApiParam("Signup User") @RequestBody UserDataDTO user) {
-		System.out.println(user.toString());
 		return userService.signup(modelMapper.map(user, User.class));
 	}
 
@@ -138,19 +133,34 @@ public class UserController {
 		return modelMapper.map(userService.searchById(id), UserResponseDTO.class);
 	}
 
-	@GetMapping(value = "/all/{filterResults}")
+	@GetMapping(value = "/all")
 	@ApiOperation(value = "${UserController.getAll}", response = UserResponseDTO.class)
 	@ApiResponses(value = {//
 			@ApiResponse(code = 400, message = "Something went wrong"), //
 			@ApiResponse(code = 404, message = "The user doesn't exist")})
-	public List<UserResponseDTO> getAll(@ApiParam("Filter") @PathVariable boolean filterResults) {
-		List<User> users = userService.getAllUsers();
-		List<UserResponseDTO> response = new ArrayList<>();
-		for (User user : users) {
-			if (!(filterResults && user.getAccountStatus() == 1)){
-				response.add(modelMapper.map(user, UserResponseDTO.class));
+	public UserListResponseDTO getAll(@ApiParam("Filter") @RequestParam String filterResults,
+									  @ApiParam("maxResults") @RequestParam String maxResults,
+									  @ApiParam("page") @RequestParam String page,
+									  @ApiParam("Username") @RequestParam String username) {
+		List<User> _users;
+		if (username != null) {
+			_users = userService.searchAllByUsername(username);
+		} else {
+			_users = userService.getAllUsers();
+		}
+		List<UserResponseDTO> users = new ArrayList<>();
+		UserListResponseDTO response = new UserListResponseDTO();
+		for (User user : _users) {
+			if (!(filterResults.equals("true") && user.getAccountStatus() == 1)){
+				users.add(modelMapper.map(user, UserResponseDTO.class));
 			}
 		}
+		response.setAmountAll(users.size());
+		int startIndex = Integer.parseInt(page) * Integer.parseInt(maxResults);
+		int endIndex = startIndex + Integer.parseInt(maxResults);
+		endIndex = Math.min(endIndex, users.size());
+		users = users.subList(startIndex, endIndex);
+		response.setUsers(users);
 		return response;
 	}
 
