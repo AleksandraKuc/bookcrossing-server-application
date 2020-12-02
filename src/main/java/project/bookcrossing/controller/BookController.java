@@ -55,11 +55,12 @@ public class BookController {
 		List<Book> books = bookService.getAllBooks(title, category);
 		BookListResponseDTO response = new BookListResponseDTO();
 		response.setAmountAll(books.size());
-
-		int startIndex = Integer.parseInt(page) * Integer.parseInt(maxResults);
-		int endIndex = startIndex + Integer.parseInt(maxResults);
-		endIndex = Math.min(endIndex, books.size());
-		books = books.subList(startIndex, endIndex);
+		if (!maxResults.equals("") && !page.equals("")) {
+			int startIndex = Integer.parseInt(page) * Integer.parseInt(maxResults);
+			int endIndex = startIndex + Integer.parseInt(maxResults);
+			endIndex = Math.min(endIndex, books.size());
+			books = books.subList(startIndex, endIndex);
+		}
 		if (username.equals("null")) {
 			response.setBooks(changeBookClass(books));
 		} else {
@@ -76,50 +77,6 @@ public class BookController {
 	public BookResponseDTO searchById(@ApiParam("Id") @PathVariable long id) {
 		return modelMapper.map(bookService.searchById(id), BookResponseDTO.class);
 	}
-
-//	@GetMapping(value = "/title&category/{title}/{category}/{username}")
-//	@ApiOperation(value = "${BookController.searchByTitleCategory}", response = BookResponseDTO.class)
-//	@ApiResponses(value = {//
-//			@ApiResponse(code = 400, message = "Something went wrong"), //
-//			@ApiResponse(code = 404, message = "The user doesn't exist")})
-//	public List<BookResponseDTO> searchByTitleCategory(@ApiParam("Title") @PathVariable String title,
-//											   @ApiParam("Category") @PathVariable String category,
-//											   @ApiParam("Username") @PathVariable String username) {
-//		List<Book> books = bookService.searchByTitleCategory(title, category);
-//		if (username.equals("null")) {
-//			return changeBookClass(books);
-//		}
-//		return checkCurrentUser(books, username);
-//	}
-
-//	@GetMapping(value = "/title/{title}/{username}")
-//	@ApiOperation(value = "${BookController.searchByTitle}", response = BookResponseDTO.class)
-//	@ApiResponses(value = {//
-//			@ApiResponse(code = 400, message = "Something went wrong"), //
-//			@ApiResponse(code = 404, message = "The user doesn't exist")})
-//	public List<BookResponseDTO> searchByTitle(@ApiParam("Title") @PathVariable String title,
-//											   @ApiParam("Username") @PathVariable String username) {
-//		List<Book> books = bookService.searchByTitle(title);
-//		if (username.equals("null")) {
-//			return changeBookClass(books);
-//		}
-//		return checkCurrentUser(books, username);
-//	}
-
-//	@GetMapping(value = "/category/{category}/{username}")
-//	@ApiOperation(value = "${BookController.searchByCategory}", response = BookResponseDTO.class)
-//	@ApiResponses(value = {//
-//			@ApiResponse(code = 400, message = "Something went wrong"), //
-//			@ApiResponse(code = 404, message = "The user doesn't exist")})
-//	public List<BookResponseDTO> searchByCategory(@ApiParam("Category") @PathVariable String category,
-//												  @ApiParam("Username") @PathVariable String username) {
-//		List<Book> books = bookService.searchByCategory(category);
-//		if (username.equals("null")) {
-//			return changeBookClass(books);
-//		}
-//		return checkCurrentUser(books, username);
-//	}
-
 
 	@GetMapping(value = "/addedByUser/{username}")
 	@ApiOperation(value = "${BookController.getAddedByUser}", response = BookResponseDTO.class)
@@ -176,10 +133,12 @@ public class BookController {
 			}
 		}
 		response.setAmountAll(books.size());
-		int startIndex = Integer.parseInt(page) * Integer.parseInt(maxResults);
-		int endIndex = startIndex + Integer.parseInt(maxResults);
-		endIndex = Math.min(endIndex, books.size());
-		books = books.subList(startIndex, endIndex);
+		if (!maxResults.equals("") && !page.equals("")) {
+			int startIndex = Integer.parseInt(page) * Integer.parseInt(maxResults);
+			int endIndex = startIndex + Integer.parseInt(maxResults);
+			endIndex = Math.min(endIndex, books.size());
+			books = books.subList(startIndex, endIndex);
+		}
 		response.setBooks(books);
 		return response;
 	}
