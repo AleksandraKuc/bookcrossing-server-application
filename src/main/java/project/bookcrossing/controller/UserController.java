@@ -156,10 +156,12 @@ public class UserController {
 			}
 		}
 		response.setAmountAll(users.size());
-		int startIndex = Integer.parseInt(page) * Integer.parseInt(maxResults);
-		int endIndex = startIndex + Integer.parseInt(maxResults);
-		endIndex = Math.min(endIndex, users.size());
-		users = users.subList(startIndex, endIndex);
+		if (!maxResults.equals("") && !page.equals("")) {
+			int startIndex = Integer.parseInt(page) * Integer.parseInt(maxResults);
+			int endIndex = startIndex + Integer.parseInt(maxResults);
+			endIndex = Math.min(endIndex, users.size());
+			users = users.subList(startIndex, endIndex);
+		}
 		response.setUsers(users);
 		return response;
 	}
