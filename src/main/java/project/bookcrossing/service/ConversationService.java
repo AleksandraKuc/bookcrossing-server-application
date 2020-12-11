@@ -82,11 +82,9 @@ public class ConversationService {
 		for (Conversation conv : conversations) {
 			if ((conv.getFirstUser().getId() == first.getId() && conv.getSecondUser().getId() == second.getId()) ||
 					(conv.getFirstUser().getId() == second.getId() && conv.getSecondUser().getId() == first.getId())) {
-				System.out.println("true");
 				return true;
 			}
 		}
-		System.out.println("false");
 		return false;
 	}
 }

@@ -35,7 +35,6 @@ public class ConversationController {
 			@ApiResponse(code = 422, message = "Username is already in use")})
 	public ConversationResponseDTO create(@ApiParam("FirstUser") @PathVariable String username,
 										  @ApiParam("RecipientUser") @PathVariable String recipientName) {
-		System.out.println("creating conv");
 		User firstUser = userService.search(username);
 		User secondUser = userService.search(recipientName);
 		Conversation conversation = conversationService.createConversation(firstUser, secondUser);
@@ -52,7 +51,6 @@ public class ConversationController {
 			@ApiResponse(code = 422, message = "Username is already in use")})
 	public ConversationResponseDTO getConvByUsers(@ApiParam("FirstUser") @PathVariable String username,
 										  @ApiParam("RecipientUser") @PathVariable String recipientName) {
-		System.out.println("weszło");
 		User firstUser = userService.search(username);
 		User secondUser = userService.search(recipientName);
 		Conversation conversation = conversationService.getByUsers(firstUser, secondUser);
@@ -68,7 +66,6 @@ public class ConversationController {
 			@ApiResponse(code = 422, message = "Username is already in use")})
 	public boolean checkIfExists(@ApiParam("FirstUser") @PathVariable String username,
 										  @ApiParam("RecipientUser") @PathVariable String recipientName) {
-		System.out.println("checking if exists");
 		User firstUser = userService.search(username);
 		User secondUser = userService.search(recipientName);
 		return conversationService.checkIfExists(firstUser, secondUser);
