@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import project.bookcrossing.entity.*;
 import project.bookcrossing.exception.CustomException;
 import project.bookcrossing.repository.BookRepository;
-import project.bookcrossing.repository.ImagesRepository;
 
 import java.util.Date;
 import java.util.List;
@@ -20,16 +19,10 @@ public class BookService {
 	private BookRepository bookRepository;
 	@Autowired
 	private BookHistoryService historyService;
-	@Autowired
-	private ImagesRepository imagesRepository;
 
 	public Book create(Book book) {
 		BookHistory bookHistory = new BookHistory(new Date(), new Date());
 		book.setHistory(bookHistory);
-		if (book.getImage() != null) {
-			Optional<Images> image = imagesRepository.findById(book.getImage().getId_image());
-			image.ifPresent(book::setImage);
-		}
 		return bookRepository.save(book);
 	}
 
@@ -46,7 +39,6 @@ public class BookService {
 
 	public Book searchById(long id) {
 		Optional<Book> book = bookRepository.findById(id);
-		//			throw new CustomException("The user doesn't exist", HttpStatus.NOT_FOUND);
 		return book.orElse(null);
 	}
 

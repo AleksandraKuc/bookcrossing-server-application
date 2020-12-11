@@ -6,21 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.multipart.MultipartFile;
 import project.bookcrossing.dto.book.BookDataDTO;
 import project.bookcrossing.dto.book.BookListResponseDTO;
 import project.bookcrossing.dto.book.BookResponseDTO;
 import project.bookcrossing.entity.*;
-import project.bookcrossing.repository.ImagesRepository;
 import project.bookcrossing.service.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
 
 @CrossOrigin(origins = {"http://localhost:4200", "http://localhost:8100"})
 @RestController
@@ -39,8 +32,6 @@ public class BookController {
 	private FavouriteBooksService favouriteBooksService;
 	@Autowired
 	private ModelMapper modelMapper;
-	@Autowired
-	private ImagesRepository imagesRepository;
 
 	@GetMapping(value = "/all")
 	@ApiOperation(value = "${BookController.getAll}", response = BookResponseDTO.class)
@@ -143,24 +134,6 @@ public class BookController {
 		return response;
 	}
 
-	@PostMapping("/upload")
-	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
-	@ApiOperation(value = "${BookController.uploadImage}")
-	@ApiResponses(value = {//
-			@ApiResponse(code = 400, message = "Something went wrong"), //
-			@ApiResponse(code = 403, message = "Access denied"), //
-			@ApiResponse(code = 422, message = "Username is already in use")})
-	public Images uploadImage(@ApiParam("Image") @RequestBody MultipartFile image) {
-		try {
-			Images img = new Images(image.getOriginalFilename(), image.getContentType(),
-					compressBytes(image.getBytes()));
-			return imagesRepository.save(img);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
 	@PostMapping("/create/{username}")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT')")
 	@ApiOperation(value = "${BookController.create}")
@@ -254,45 +227,5 @@ public class BookController {
 			}
 		}
 		return response;
-	}
-
-	// compress the image bytes before storing it in the database
-	public static byte[] compressBytes(byte[] data) {
-		Deflater deflater = new Deflater();
-		deflater.setInput(data);
-		deflater.finish();
-
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
-		byte[] buffer = new byte[1024];
-		while (!deflater.finished()) {
-			int count = deflater.deflate(buffer);
-			outputStream.write(buffer, 0, count);
-		}
-		try {
-			outputStream.close();
-		} catch (IOException e) {
-			System.out.print("Problem!");
-		}
-		System.out.println("Compressed Image Byte Size - " + outputStream.toByteArray().length);
-
-		return outputStream.toByteArray();
-	}
-
-	// uncompress the image bytes before returning it to the angular application
-	public static byte[] decompressBytes(byte[] data) {
-		Inflater inflater = new Inflater();
-		inflater.setInput(data);
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
-		byte[] buffer = new byte[1024];
-		try {
-			while (!inflater.finished()) {
-				int count = inflater.inflate(buffer);
-				outputStream.write(buffer, 0, count);
-			}
-			outputStream.close();
-		} catch (IOException | DataFormatException ioe) {
-			System.out.println("problem!");
-		}
-		return outputStream.toByteArray();
 	}
 }

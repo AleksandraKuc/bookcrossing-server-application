@@ -24,10 +24,6 @@ public class Book implements Serializable{
 	private BookCategory category;
 
 	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "image", referencedColumnName = "id_image")
-	private Images image;
-
-	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "history", referencedColumnName = "id_history")
 	private BookHistory history;
 
@@ -41,13 +37,12 @@ public class Book implements Serializable{
 		this.category = category;
 	}
 
-	public Book(String title, String author, String description, String ISBN, BookCategory category, Images image, BookHistory bookHistory){
+	public Book(String title, String author, String description, String ISBN, BookCategory category, BookHistory bookHistory){
 		this.title = title;
 		this.author = author;
 		this.description = description;
 		this.ISBN = ISBN;
 		this.category = category;
-		this.image = image;
 		this.history = bookHistory;
 	}
 
@@ -107,14 +102,6 @@ public class Book implements Serializable{
 		this.category = category;
 	}
 
-	public Images getImage() {
-		return image;
-	}
-
-	public void setImage(Images image) {
-		this.image = image;
-	}
-
 	@Override
 	public String toString() {
 		return "Book{" +
@@ -124,7 +111,6 @@ public class Book implements Serializable{
 				", description='" + description + '\'' +
 				", ISBN='" + ISBN + '\'' +
 				", category=" + category +
-				", image=" + image.toString() +
 				'}';
 	}
 }

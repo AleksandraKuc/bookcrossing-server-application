@@ -3,7 +3,6 @@ package project.bookcrossing.dto.book;
 import io.swagger.annotations.ApiModelProperty;
 
 import project.bookcrossing.entity.BookCategory;
-import project.bookcrossing.entity.Images;
 
 public class BookDataDTO {
 
@@ -19,8 +18,6 @@ public class BookDataDTO {
 	private String ISBN;
 	@ApiModelProperty(position = 5)
 	private BookCategory category;
-	@ApiModelProperty(position = 6)
-	private Images image;
 
 	public long getId_book() {
 		return idBook;
@@ -68,14 +65,6 @@ public class BookDataDTO {
 
 	public void setCategory(BookCategory category) {
 		this.category = category;
-	}
-
-	public Images getImage() {
-		return image;
-	}
-
-	public void setImage(Images image) {
-		this.image = image;
 	}
 
 	@Override
