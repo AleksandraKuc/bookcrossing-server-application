@@ -23,7 +23,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-
 		// Disable CSRF (cross site request forgery)
 		http.csrf().disable();
 
@@ -36,7 +35,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/api/user/signin").permitAll()//
 				.antMatchers("/api/contact").permitAll();//
 //				.antMatchers("/api/user/getByUsername/**").permitAll();
-//				.antMatchers("/h2-console/**/**").permitAll()
 				// Disallow everything else..
 //				.anyRequest().authenticated();
 

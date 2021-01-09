@@ -28,15 +28,11 @@ import project.bookcrossing.exception.CustomException;
 @Component
 public class JwtTokenProvider {
 
-	/**
-	 * THIS IS NOT A SECURE PRACTICE! For simplicity, we are storing a static key here. Ideally, in a
-	 * microservices environment, this key would be kept on a config-server.
-	 */
 	@Value("${bookcrossing.jwtSecret}")
 	private String secretKey;
 
 	@Value("${bookcrossing.jwtExpirationMs}")
-	private long validityInMilliseconds = 3600000; // 1h
+	private final long validityInMilliseconds = 3600000; // 1h
 
 	@Autowired
 	private MyUserDetails myUserDetails;
@@ -47,7 +43,6 @@ public class JwtTokenProvider {
 	}
 
 	public String createToken(String username, List<Role> roles) {
-
 		Claims claims = Jwts.claims().setSubject(username);
 		claims.put("auth", roles.stream().map(s -> new SimpleGrantedAuthority(s.getAuthority())).filter(Objects::nonNull).collect(Collectors.toList()));
 

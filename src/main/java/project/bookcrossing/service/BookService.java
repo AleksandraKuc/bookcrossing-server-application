@@ -20,6 +20,10 @@ public class BookService {
 	@Autowired
 	private BookHistoryService historyService;
 
+	public List<Book> getBooks() {
+		return (List<Book>) bookRepository.findAll();
+	}
+
 	public Book create(Book book) {
 		BookHistory bookHistory = new BookHistory(new Date(), new Date());
 		book.setHistory(bookHistory);
@@ -38,7 +42,7 @@ public class BookService {
 	}
 
 	public Book searchById(long id) {
-		Optional<Book> book = bookRepository.findById(id);
+		Optional<Book> book = bookRepository.findByIdBook(id);
 		return book.orElse(null);
 	}
 
@@ -63,7 +67,7 @@ public class BookService {
 	}
 
 	public Book update(Book book) {
-		Optional<Book> _bookData = bookRepository.findById(book.getId_book());
+		Optional<Book> _bookData = bookRepository.findByIdBook(book.getId_book());
 		if(_bookData.isPresent()){
 			Book bookData = _bookData.get();
 			book.setTitle(book.getTitle() != null ? book.getTitle() : bookData.getTitle());
@@ -83,13 +87,13 @@ public class BookService {
 	}
 
 	public Book updateLastHired(long bookId) {
-		Optional<Book> bookData = bookRepository.findById(bookId);
+		Optional<Book> bookData = bookRepository.findByIdBook(bookId);
 		if (bookData.isEmpty()) {
 			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
 		}
 		BookHistory history = bookData.get().getHistory();
 		historyService.updateHistory(history.getId_history());
-		bookData = bookRepository.findById(bookId);
+		bookData = bookRepository.findByIdBook(bookId);
 		if (bookData.isEmpty()) {
 			throw new CustomException("The book doesn't exist", HttpStatus.NOT_FOUND);
 		}

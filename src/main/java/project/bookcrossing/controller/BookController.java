@@ -46,16 +46,16 @@ public class BookController {
 		List<Book> books = bookService.getAllBooks(title, category);
 		BookListResponseDTO response = new BookListResponseDTO();
 		response.setAmountAll(books.size());
+		if (username.equals("null")) {
+			response.setBooks(changeBookClass(books));
+		} else {
+			response.setBooks(checkCurrentUser(books, username));
+		}
 		if (!maxResults.equals("") && !page.equals("")) {
 			int startIndex = Integer.parseInt(page) * Integer.parseInt(maxResults);
 			int endIndex = startIndex + Integer.parseInt(maxResults);
 			endIndex = Math.min(endIndex, books.size());
 			books = books.subList(startIndex, endIndex);
-		}
-		if (username.equals("null")) {
-			response.setBooks(changeBookClass(books));
-		} else {
-			response.setBooks(checkCurrentUser(books, username));
 		}
 		return response;
 	}
@@ -64,7 +64,7 @@ public class BookController {
 	@ApiOperation(value = "${BookController.searchById}", response = BookResponseDTO.class)
 	@ApiResponses(value = {//
 			@ApiResponse(code = 400, message = "Something went wrong"), //
-			@ApiResponse(code = 404, message = "The user doesn't exist")})
+			@ApiResponse(code = 404, message = "The book doesn't exist")})
 	public BookResponseDTO searchById(@ApiParam("Id") @PathVariable long id) {
 		return modelMapper.map(bookService.searchById(id), BookResponseDTO.class);
 	}

@@ -17,6 +17,7 @@ import project.bookcrossing.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @CrossOrigin(origins = {"http://localhost:4200", "http://localhost:8100"})
@@ -143,7 +144,7 @@ public class UserController {
 									  @ApiParam("page") @RequestParam String page,
 									  @ApiParam("Username") @RequestParam String username) {
 		List<User> _users;
-		if (username != null) {
+		if (username != null && !username.equals("")) {
 			_users = userService.searchAllByUsername(username);
 		} else {
 			_users = userService.getAllUsers();
